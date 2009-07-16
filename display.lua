@@ -22,7 +22,7 @@ local Display = setmetatable({}, {
 				bar:SetStatusBarColor(col.r, col.g, col.b)
 				bar:SetMinMaxValues(0, 100)
 				bar:SetPoint("LEFT")
-				--bar:SetPoint("RIGHT")
+				bar:SetPoint("RIGHT")
 
 				local left = bar:CreateFontString(nil, "OVERLAY")
 				left:SetFont(STANDARD_TEXT_FONT, 14)
@@ -90,7 +90,7 @@ function Display:UpdateDisplay()
 			bar.pos = 0
 			bar:Hide()
 		elseif bar.pos ~= i then
-			bar:SetWidth(100 * (bar.total / self.max))
+			bar:SetValue(100 * (bar.total / self.max))
 
 			bar:SetPoint("TOP", fiend.frame, "TOP", 0, -16 * (i - 1))
 
