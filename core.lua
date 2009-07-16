@@ -1,5 +1,22 @@
 local addon = CreateFrame("Frame")
 addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
+local timer = 0
+addon:SetScript("OnUpdate", function(self, elapsed)
+	timer = timer + elapsed
+
+	if timer > 1 then
+		for name, display in pairs(self.displays) do
+			if display.dirty and display.isActive then
+				display:UpdateDisplay()
+			end
+		end
+		timer = 0
+	end
+end)
+addon:Show()
+
+local band = bit.band
+local filter = COMBATLOG_OBJECT_AFFILIATION_RAID + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_MINE
 
 addon:RegisterEvent("ADDON_LOADED")
 
@@ -53,8 +70,11 @@ function addon:ADDON_LOADED(name)
 	self.frame = frame
 
 	self.displays = {}
+	self.displayCount = 0
 
-	self.Display("Damage", 16)
+	local damage = self.Display("Damage", 16)
+	damage.isActive = true
+
 	self.Display("Healing", 16)
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -66,11 +86,9 @@ local spellId, spellName, spellSchool, ammount, over, school, resist
 function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
 	if not events[event] then return end
 
-	if bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= COMBATLOG_OBJECT_AFFILIATION_MINE or
-	bit.band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_RAID) ~= COMBATLOG_OBJECT_AFFILIATION_RAID then
+	if band(sourceFlags, filter) == 0 then
 		return
 	end
-
 
 	if event == "SWING_DAMAGE" then
 		ammount, over, school, resist = ...

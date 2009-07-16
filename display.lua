@@ -7,34 +7,37 @@ local Display = setmetatable({}, {
 		if not fiend.displays[name] then
 			local t = setmetatable({}, { __index = self } )
 
+			fiend.displayCount = fiend.displayCount + 1
+
 			t.bars = {}
 			t.max = 0
 			t.isActive = false
 			t.size = size
 
-			if (#fiend.displays == 0) then
-				t.isActive = true
-			end
-
 			t.names = setmetatable({}, { __index = function(self, name)
-				local bar = fiend.frame:CreateTexture(nil, "OVERLAY")
-				bar:SetTexture(texture)
+				local bar = CreateFrame("Statusbar", nil, fiend.frame)
+				bar:SetStatusBarTexture(texture)
 				bar:SetHeight(size)
 				local col = RAID_CLASS_COLORS[select(2, UnitClass(name)) or "WARRIOR"]
-				bar:SetVertexColor(col.r, col.g, col.b)
+				bar:SetStatusBarColor(col.r, col.g, col.b)
+				bar:SetMinMaxValues(0, 100)
+				bar:SetPoint("LEFT")
+				--bar:SetPoint("RIGHT")
 
-				local left = fiend.frame:CreateFontString(nil, "OVERLAY")
+				local left = bar:CreateFontString(nil, "OVERLAY")
 				left:SetFont(STANDARD_TEXT_FONT, 14)
 				left:SetPoint("LEFT", bar, "LEFT")
-				left:SetPoint("CENTER", bar, "CENTER")
+				left:SetPoint("BOTTOM")
+				left:SetPoint("TOP")
 				left:SetText(name)
 
 				bar.left = left
 
-				local right = fiend.frame:CreateFontString(nil, "OVERLAY")
+				local right = bar:CreateFontString(nil, "OVERLAY")
 				right:SetFont(STANDARD_TEXT_FONT, 14)
 				right:SetPoint("RIGHT", fiend.frame, "RIGHT")
-				right:SetPoint("CENTER", bar, "CENTER")
+				right:SetPoint("TOP")
+				right:SetPoint("BOTTOM")
 				right:SetJustifyH("RIGHT")
 				right:SetText("0")
 
@@ -50,7 +53,9 @@ local Display = setmetatable({}, {
 				table.insert(t.bars, bar)
 				self[name] = bar
 
-				return self[name]
+				bar:Hide()
+
+				return bar
 			end})
 
 			fiend.displays[title] = t
@@ -61,49 +66,40 @@ local Display = setmetatable({}, {
 })
 
 function Display:Update(name, ammount)
+	self.dirty = true
 	local bar = self.names[name]
 
 	bar.total = bar.total + ammount
-
-	if not self.isActive then return end
-
-	for i, bar in ipairs(self.bars) do
-		if bar.total > self.max then
-			self.max = bar.total
-		end
-	end
-
-	bar:SetWidth(fiend.frame:GetWidth() * (bar.total / self.max))
 	bar.right:SetText(bar.total)
-
-	self:UpdateDisplay()
 end
 
 function Display:UpdateDisplay()
+	if not self.isActive then return end
+
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
 
-	local total = math.floor(fiend.frame:GetHeight() / self.size)
+	self.max = self.bars[1].total
 
-	for i, bar in ipairs(self.bars) do
-		bar:SetWidth(fiend.frame:GetWidth() * (bar.total / self.max))
-		bar:Show()
+	local total = math.floor(fiend.frame:GetHeight() / self.size)
+	local width = fiend.frame:GetWidth()
+
+	local bar
+	for i = 1, #self.bars do
+		bar = self.bars[i]
 		if i > total then
 			bar.pos = 0
 			bar:Hide()
 		elseif bar.pos ~= i then
-			bar:ClearAllPoints()
+			bar:SetWidth(100 * (bar.total / self.max))
 
-			if i > 1 then
-				bar:SetPoint("TOP", self.bars[i - 1], "BOTTOM")
-			else
-				bar:SetPoint("TOP", fiend.frame, "TOP")
-			end
-
-			bar:SetPoint("LEFT", fiend.frame, "LEFT")
+			bar:SetPoint("TOP", fiend.frame, "TOP", 0, -16 * (i - 1))
 
 			bar.pos = i
+			bar:Show()
 		end
 	end
+
+	self.dirty = false
 end
 
 function Display:ResetBar(name)
@@ -154,6 +150,23 @@ function Display:Resizing()
 			bar:Show()
 		end
 	end
+end
+
+function Display:Activate()
+	self.isActive = true
+	for k, v in pairs(fiend.displays) do
+		if v ~= self and v.isActive then
+			v.isActive = false
+			break
+		end
+	end
+
+	for i, bar in ipairs(self.bars) do
+		if bar.total > self.max then
+			self.max = bar.total
+		end
+	end
+	--self:UpdateDisplay()
 end
 
 fiend.Display = Display
