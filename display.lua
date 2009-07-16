@@ -81,7 +81,7 @@ function Display:UpdateDisplay()
 
 	self.max = self.bars[1].total
 
-	local total = math.floor(fiend.frame:GetHeight() - 20 / self.size)
+	local total = math.floor((fiend.frame:GetHeight() - 32) / self.size)
 	local width = fiend.frame:GetWidth()
 
 	local bar
@@ -94,7 +94,7 @@ function Display:UpdateDisplay()
 			bar:SetValue(100 * (bar.total / self.max))
 
 			if bar.pos ~= i then
-				bar:SetPoint("TOP", fiend.frame, "TOP", 0, - 20 + -16 * (i - 1))
+				bar:SetPoint("TOP", fiend.frame, "TOP", 0, - 32 + -16 * (i - 1))
 			end
 
 			bar.pos = i
@@ -138,7 +138,7 @@ function Display:RemoveBar(name)
 end
 
 function Display:Resizing()
-	local total = math.floor(fiend.frame:GetHeight() - 20 / self.size)
+	local total = math.floor((fiend.frame:GetHeight() - 32) / self.size)
 
 	local bar
 	for i = 1, #self.bars do

@@ -1,7 +1,7 @@
 local addon = CreateFrame("Frame")
 addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
 local timer = 0
-addon:SetScript("OnUpdate", function(self, elapsed)
+local OnUpdate = function(self, elapsed)
 	timer = timer + elapsed
 
 	if timer > 1 then
@@ -12,7 +12,7 @@ addon:SetScript("OnUpdate", function(self, elapsed)
 		end
 		timer = 0
 	end
-end)
+end
 addon:Show()
 
 local band = bit.band
@@ -66,8 +66,14 @@ function addon:ADDON_LOADED(name)
 	})
 
 	frame:SetBackdropColor(0, 0, 0, 0.8)
+	frame:SetBackdropBorderColor(0.3, 0.3, 0.3)
 
 	self.frame = frame
+
+	local title = frame:CreateFontString(nil, "OVERLAY")
+	title:SetFont(STANDARD_TEXT_FONT, 20)
+	title:SetText("Fiend")
+	title:SetJustifyH("CENTER")
 
 	self.displays = {}
 	self.displayCount = 0
@@ -77,6 +83,7 @@ function addon:ADDON_LOADED(name)
 
 	--self.Display("Healing", 18)
 
+	self:SetScript("OnUpdate", OnUpdate)
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 	self.ADDON_LOADED = nil
@@ -110,7 +117,9 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			display = self.displays.Damage
 		end
 
-		display:Update(sourceName, damage)
+		if display then
+			display:Update(sourceName, damage)
+		end
 	end
 end
 
