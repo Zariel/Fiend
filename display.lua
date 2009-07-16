@@ -25,7 +25,7 @@ local Display = setmetatable({}, {
 				bar:SetPoint("RIGHT")
 
 				local left = bar:CreateFontString(nil, "OVERLAY")
-				left:SetFont(STANDARD_TEXT_FONT, 14)
+				left:SetFont(STANDARD_TEXT_FONT, 14, "THINOUTLINE")
 				left:SetPoint("LEFT", bar, "LEFT")
 				left:SetPoint("BOTTOM")
 				left:SetPoint("TOP")
@@ -34,7 +34,7 @@ local Display = setmetatable({}, {
 				bar.left = left
 
 				local right = bar:CreateFontString(nil, "OVERLAY")
-				right:SetFont(STANDARD_TEXT_FONT, 14)
+				right:SetFont(STANDARD_TEXT_FONT, 14, "THINOUTLINE")
 				right:SetPoint("RIGHT", fiend.frame, "RIGHT")
 				right:SetPoint("TOP")
 				right:SetPoint("BOTTOM")
@@ -84,6 +84,8 @@ function Display:UpdateDisplay()
 	local total = math.floor((fiend.frame:GetHeight() - 32) / self.size)
 	local width = fiend.frame:GetWidth()
 
+	local size = self.size
+
 	local bar
 	for i = 1, #self.bars do
 		bar = self.bars[i]
@@ -94,10 +96,10 @@ function Display:UpdateDisplay()
 			bar:SetValue(100 * (bar.total / self.max))
 
 			if bar.pos ~= i then
-				bar:SetPoint("TOP", fiend.frame, "TOP", 0, - 32 + -16 * (i - 1))
-			end
+				bar:SetPoint("TOP", fiend.frame, "TOP", 0, ((i - 1) * -size) - 32)
 
-			bar.pos = i
+				bar.pos = i
+			end
 
 			bar:Show()
 		end
