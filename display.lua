@@ -42,7 +42,7 @@ local Display = setmetatable({}, {
 				right:SetPoint("BOTTOM")
 				right:SetJustifyH("RIGHT")
 				right:SetText(0)
-				rightSetShadowColor(0, 0, 0, 0.8)
+				right:SetShadowColor(0, 0, 0, 0.8)
 				right:SetShadowOffset(1, - 1)
 
 				bar.right = right

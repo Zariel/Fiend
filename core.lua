@@ -71,9 +71,13 @@ function addon:ADDON_LOADED(name)
 	self.frame = frame
 
 	local title = frame:CreateFontString(nil, "OVERLAY")
-	title:SetFont(STANDARD_TEXT_FONT, 20)
+	title:SetFont(STANDARD_TEXT_FONT, 16)
 	title:SetText("Fiend")
 	title:SetJustifyH("CENTER")
+	title:SetPoint("CENTER")
+	title:SetPoint("TOP", 0, - 12)
+
+	frame.title = title
 
 	self.displays = {}
 	self.displayCount = 0
