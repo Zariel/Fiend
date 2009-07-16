@@ -25,21 +25,25 @@ local Display = setmetatable({}, {
 				bar:SetPoint("RIGHT")
 
 				local left = bar:CreateFontString(nil, "OVERLAY")
-				left:SetFont(STANDARD_TEXT_FONT, 14, "THINOUTLINE")
+				left:SetFont(STANDARD_TEXT_FONT, 14)
 				left:SetPoint("LEFT", bar, "LEFT")
 				left:SetPoint("BOTTOM")
 				left:SetPoint("TOP")
 				left:SetText(name)
+				left:SetShadowColor(0, 0, 0, 0.8)
+				left:SetShadowOffset(1, - 1)
 
 				bar.left = left
 
 				local right = bar:CreateFontString(nil, "OVERLAY")
-				right:SetFont(STANDARD_TEXT_FONT, 14, "THINOUTLINE")
+				right:SetFont(STANDARD_TEXT_FONT, 14)
 				right:SetPoint("RIGHT", fiend.frame, "RIGHT")
 				right:SetPoint("TOP")
 				right:SetPoint("BOTTOM")
 				right:SetJustifyH("RIGHT")
-				right:SetText("0")
+				right:SetText(0)
+				rightSetShadowColor(0, 0, 0, 0.8)
+				right:SetShadowOffset(1, - 1)
 
 				bar.right = right
 
