@@ -94,7 +94,7 @@ function Display:UpdateDisplay()
 			bar:SetValue(100 * (bar.total / self.max))
 
 			if bar.pos ~= i then
-				bar:SetPoint("TOP", fiend.frame, "TOP", 0, -16 * (i - 1))
+				bar:SetPoint("TOP", fiend.frame, "TOP", 0, - 20 + -16 * (i - 1))
 			end
 
 			bar.pos = i
