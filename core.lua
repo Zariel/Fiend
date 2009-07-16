@@ -60,9 +60,9 @@ function addon:ADDON_LOADED(name)
 	end)
 
 	frame:SetBackdrop({
-		bgFile = "Interface\\ChatFrame\\ChatFrameBackground", tile = true, tileSize = 16,
-		--edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 10,
-		insets = {left = -1, right = -1, top = -1, bottom = -1},
+		bgFile = [[Interface\Tooltips\UI-Tooltip-Background.tga]], tile = true, tileSize = 16,
+		edgeFile = [[Interface\AddOns\Fiend\media\otravi-semi-full-border.tga]], edgeSize = 32,
+		insets = {left = 0, right = 0, top = 20, bottom = 0},
 	})
 
 	frame:SetBackdropColor(0, 0, 0, 0.8)
@@ -72,10 +72,10 @@ function addon:ADDON_LOADED(name)
 	self.displays = {}
 	self.displayCount = 0
 
-	local damage = self.Display("Damage", 16)
+	local damage = self.Display("Damage", 18)
 	damage.isActive = true
 
-	self.Display("Healing", 16)
+	--self.Display("Healing", 18)
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
