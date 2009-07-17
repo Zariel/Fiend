@@ -49,7 +49,7 @@ local Display = setmetatable({}, {
 
 					local left = bar:CreateFontString(nil, "OVERLAY")
 					left:SetFont(STANDARD_TEXT_FONT, size - 2)
-					left:SetPoint("LEFT", bar, "LEFT")
+					left:SetPoint("LEFT", bar, "LEFT", 5, 0)
 					left:SetPoint("BOTTOM")
 					left:SetPoint("TOP")
 					left:SetText(name)
@@ -60,7 +60,7 @@ local Display = setmetatable({}, {
 
 					local right = bar:CreateFontString(nil, "OVERLAY")
 					right:SetFont(STANDARD_TEXT_FONT, 14)
-					right:SetPoint("RIGHT", fiend.frame, "RIGHT")
+					right:SetPoint("RIGHT", fiend.frame, "RIGHT", - 5, 0)
 					right:SetPoint("TOP")
 					right:SetPoint("BOTTOM")
 					right:SetJustifyH("RIGHT")
