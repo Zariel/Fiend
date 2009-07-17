@@ -26,11 +26,13 @@ local Display = setmetatable({}, {
 				bar:SetPoint("RIGHT")
 
 				local left = bar:CreateFontString(nil, "OVERLAY")
-				left:SetFont(STANDARD_TEXT_FONT, 14)
+				left:SetFont(STANDARD_TEXT_FONT, size - 2)
 				left:SetPoint("LEFT", bar, "LEFT")
 				left:SetPoint("BOTTOM")
 				left:SetPoint("TOP")
 				left:SetText(name)
+				left:SetShadowColor(0, 0, 0, 0.8)
+				left:SetShadowOffset(0.8, - 0.8)
 
 				bar.left = left
 
@@ -41,6 +43,8 @@ local Display = setmetatable({}, {
 				right:SetPoint("BOTTOM")
 				right:SetJustifyH("RIGHT")
 				right:SetText(0)
+				right:SetShadowColor(0, 0, 0, 0.8)
+				right:SetShadowOffset(0.8, - 0.8)
 
 				bar.right = right
 
@@ -123,7 +127,7 @@ function Display:ResetBar(name)
 	self.dirty = true
 end
 
-function Displayer:ResetAllBars()
+function Display:ResetAllBars()
 	local bar
 	for i = 1, #self.bars do
 		bar = self.bars[i]

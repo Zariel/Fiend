@@ -81,7 +81,7 @@ function addon:ADDON_LOADED(name)
 	self.displays = {}
 	self.displayCount = 0
 
-	local damage = self.Display("Damage", 18)
+	local damage = self.Display("Damage", 16)
 	damage:Activate()
 
 	--self.Display("Healing", 18)
