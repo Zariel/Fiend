@@ -12,6 +12,7 @@ local OnEnter = function(self)
 	end
 end
 
+local pool = setmetatable({}, { __mode = "k" })
 local Display = setmetatable({}, {
 	__call = function(self, title, size)
 		if not fiend.displays[name] then
@@ -26,47 +27,56 @@ local Display = setmetatable({}, {
 			t.title = title
 
 			t.names = setmetatable({}, { __index = function(self, name)
-				local bar = CreateFrame("Statusbar", nil, fiend.frame)
-				bar:SetStatusBarTexture(texture)
-				bar:SetHeight(size)
+				local bar
+				if next(pool) then
+					bar = table.remove(pool, 1)
+				else
+					bar = CreateFrame("Statusbar", nil, fiend.frame)
+					bar:SetStatusBarTexture(texture)
+					bar:SetMinMaxValues(0, 100)
+					bar:SetPoint("LEFT")
+					bar:SetPoint("RIGHT")
+					bar:EnableMouse(true)
+
+					bar:SetScript("OnEnter", OnEnter)
+					bar:SetScript("OnLeave", function(self) tip:Hide() end)
+
+					local bg = bar:CreateTexture(nil, "BACKGROUND")
+					bg:SetTexture(texture)
+					bg:SetAllPoints(bar)
+
+					bar.bg = bg
+
+					local left = bar:CreateFontString(nil, "OVERLAY")
+					left:SetFont(STANDARD_TEXT_FONT, size - 2)
+					left:SetPoint("LEFT", bar, "LEFT")
+					left:SetPoint("BOTTOM")
+					left:SetPoint("TOP")
+					left:SetText(name)
+					left:SetShadowColor(0, 0, 0, 0.8)
+					left:SetShadowOffset(0.8, - 0.8)
+
+					bar.left = left
+
+					local right = bar:CreateFontString(nil, "OVERLAY")
+					right:SetFont(STANDARD_TEXT_FONT, 14)
+					right:SetPoint("RIGHT", fiend.frame, "RIGHT")
+					right:SetPoint("TOP")
+					right:SetPoint("BOTTOM")
+					right:SetJustifyH("RIGHT")
+					right:SetText(0)
+					right:SetShadowColor(0, 0, 0, 0.8)
+					right:SetShadowOffset(0.8, - 0.8)
+
+					bar.right = right
+				end
+
 				local class = select(2, UnitClass(name)) or "WARRIOR"
 				local col = RAID_CLASS_COLORS[class]
+
+				bar:SetHeight(size)
 				bar:SetStatusBarColor(col.r, col.g, col.b)
-				bar:SetMinMaxValues(0, 100)
-				bar:SetPoint("LEFT")
-				bar:SetPoint("RIGHT")
-				bar:EnableMouse(true)
-
-				bar:SetScript("OnEnter", OnEnter)
-				bar:SetScript("OnLeave", function(self) tip:Hide() end)
-
-				local bg = bar:CreateTexture(nil, "BACKGROUND")
-				bg:SetTexture(texture)
-				bg:SetVertexColor(col.r, col.g, col.b, 0.2)
-				bg:SetAllPoints(bar)
-
-				local left = bar:CreateFontString(nil, "OVERLAY")
-				left:SetFont(STANDARD_TEXT_FONT, size - 2)
-				left:SetPoint("LEFT", bar, "LEFT")
-				left:SetPoint("BOTTOM")
-				left:SetPoint("TOP")
-				left:SetText(name)
-				left:SetShadowColor(0, 0, 0, 0.8)
-				left:SetShadowOffset(0.8, - 0.8)
-
-				bar.left = left
-
-				local right = bar:CreateFontString(nil, "OVERLAY")
-				right:SetFont(STANDARD_TEXT_FONT, 14)
-				right:SetPoint("RIGHT", fiend.frame, "RIGHT")
-				right:SetPoint("TOP")
-				right:SetPoint("BOTTOM")
-				right:SetJustifyH("RIGHT")
-				right:SetText(0)
-				right:SetShadowColor(0, 0, 0, 0.8)
-				right:SetShadowOffset(0.8, - 0.8)
-
-				bar.right = right
+				bar.bg:SetVertexColor(col.r, col.g, col.b, 0.2)
 
 				bar.name = name
 				bar.parent = t
@@ -87,8 +97,7 @@ local Display = setmetatable({}, {
 		end
 
 		return fiend.displays[title]
-	end
-})
+end})
 
 function Display:Update(name, ammount)
 	local bar = self.names[name]
@@ -178,6 +187,19 @@ function Display:RemoveBar(name)
 	self:ResetBar(name)
 
 	self.names[name] = nil
+end
+
+function Display:RemoveAllBars()
+	local bar
+	for i = 1, #self.bars do
+		bar = table.remove(self.bars, 1)
+
+		bar:Hide()
+
+		self.names[bar.name] = nil
+
+		table.insert(pool, bar)
+	end
 end
 
 function Display:Resizing()
