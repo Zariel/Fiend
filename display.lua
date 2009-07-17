@@ -13,6 +13,7 @@ local Display = setmetatable({}, {
 			t.max = 0
 			t.isActive = false
 			t.size = size
+			t.title = title
 
 			t.names = setmetatable({}, { __index = function(self, name)
 				local bar = CreateFrame("Statusbar", nil, fiend.frame)
@@ -122,6 +123,20 @@ function Display:ResetBar(name)
 	self.dirty = true
 end
 
+function Displayer:ResetAllBars()
+	local bar
+	for i = 1, #self.bars do
+		bar = self.bars[i]
+
+		bar.total = 0
+		bar.pos = 0
+		bar.right:SetText(0)
+		bar.left:SetText("")
+
+		bar:Hide()
+	end
+end
+
 function Display:RemoveBar(name)
 	local bar = self.names[name]
 
@@ -163,6 +178,8 @@ function Display:Activate()
 		end
 	end
 
+	fiend.frame.title:SetText(self.title)
+
 	self.isActive = true
 	self.dirty = true
 end
@@ -170,9 +187,7 @@ end
 function Display:Deactivate()
 	if not self.isActive then return end
 
-	for name, bar in pairs(self.names) do
-		self:ResetBar(name)
-	end
+	self:ResetAllBars()
 
 	self.isActive = false
 end
