@@ -7,7 +7,7 @@ local OnEnter = function(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
 		tip:AddLine(self.pos .. ". " .. self.name, self.col.r, self.col.g, self.col.b)
-		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.bars[1].total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
+		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
 		tip:Show()
 	end
 end
@@ -25,6 +25,7 @@ local Display = setmetatable({}, {
 			t.isActive = false
 			t.size = size
 			t.title = title
+			t.total = 0
 
 			t.names = setmetatable({}, { __index = function(self, name)
 				local bar
@@ -103,6 +104,8 @@ function Display:Update(name, ammount)
 	local bar = self.names[name]
 
 	bar.total = bar.total + ammount
+	self.total = self.total + ammount
+
 	--bar.per = math.floor(bar.total / self.parent.bars[1].total * 100)
 
 	bar.right:SetText(bar.total)
@@ -114,8 +117,6 @@ function Display:UpdateDisplay()
 	if not self.isActive or #self.bars == 0 then return end
 
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
-
-	self.max = self.bars[1].total
 
 	local total = math.floor((fiend.frame:GetHeight() - 32) / self.size)
 	local width = fiend.frame:GetWidth()
@@ -129,7 +130,7 @@ function Display:UpdateDisplay()
 			bar.pos = 0
 			bar:Hide()
 		else
-			bar:SetValue(100 * (bar.total / self.max))
+			bar:SetValue(100 * (bar.total / self.total))
 
 			if bar.pos ~= i then
 				bar:SetPoint("TOP", fiend.frame, "TOP", 0, ((i - 1) * -size) - 32)
@@ -147,6 +148,7 @@ end
 function Display:ResetBar(name)
 	local bar = self.names[name]
 
+	self.total = self.total - bar.total
 	bar.total = 0
 	bar.pos = 0
 
@@ -170,6 +172,8 @@ function Display:ResetAllBars()
 
 		bar:Hide()
 	end
+
+	self.total = 0
 end
 
 function Display:RemoveBar(name)
@@ -200,6 +204,8 @@ function Display:RemoveAllBars()
 
 		table.insert(pool, bar)
 	end
+
+	self.total = 0
 end
 
 function Display:Resizing()
