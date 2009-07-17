@@ -70,31 +70,33 @@ function addon:ADDON_LOADED(name)
 
 	self.frame = frame
 
+	--[[
 	local title = frame:CreateFontString(nil, "OVERLAY")
 	title:SetFont(STANDARD_TEXT_FONT, 16)
 	title:SetText("Fiend")
 	title:SetJustifyH("CENTER")
 	title:SetPoint("CENTER")
 	title:SetPoint("TOP", 0, - 12)
-
+]]
 	frame.title = title
 
 	self.displays = {}
 	self.displayCount = 0
 
 	local damage = self.Display("Damage", 18)
-	damage.isActive = true
+	damage:Activate()
 
 	--self.Display("Healing", 18)
 
-	self:SetScript("OnUpdate", OnUpdate)
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	self:SetScript("OnUpdate", OnUpdate)
 
 	self.ADDON_LOADED = nil
 end
 
 local spellId, spellName, spellSchool, ammount, over, school, resist
 function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
+	print(event)
 	if not events[event] then return end
 
 	if band(sourceFlags, filter) == 0 then

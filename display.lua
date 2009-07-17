@@ -30,8 +30,6 @@ local Display = setmetatable({}, {
 				left:SetPoint("BOTTOM")
 				left:SetPoint("TOP")
 				left:SetText(name)
-				left:SetShadowColor(0, 0, 0, 0.8)
-				left:SetShadowOffset(1, - 1)
 
 				bar.left = left
 
@@ -42,8 +40,6 @@ local Display = setmetatable({}, {
 				right:SetPoint("BOTTOM")
 				right:SetJustifyH("RIGHT")
 				right:SetText(0)
-				right:SetShadowColor(0, 0, 0, 0.8)
-				right:SetShadowOffset(1, - 1)
 
 				bar.right = right
 
@@ -79,7 +75,7 @@ function Display:Update(name, ammount)
 end
 
 function Display:UpdateDisplay()
-	if not self.isActive then return end
+	if not self.isActive or #self.bars == 0 then return end
 
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
 
