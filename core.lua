@@ -60,6 +60,8 @@ function addon:ADDON_LOADED(name)
 	frame:SetScript("OnMouseDown", function(self, button)
 		if IsModifiedClick("ALT") and button == "LeftButton" then
 			self:StartMoving()
+		elseif button == "RightButton" then
+			ToggleDropDownMenu(1, nil, addon.dropDown, self)
 		end
 	end)
 
@@ -94,6 +96,8 @@ function addon:ADDON_LOADED(name)
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 	self:SetScript("OnUpdate", OnUpdate)
+
+	self:CreateDropDown()
 
 	ldb = LibStub("LibDataBroker-1.1", true)
 	if ldb then
@@ -145,6 +149,80 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 end
 
 function addon:isInCombat(name)
+end
+
+function addon:CreateDropDown()
+	local drop = CreateFrame("Frame", "FiendDropDown", UIParent, "UIDropDownMenuTemplate")
+
+	local slider = CreateFrame("Slider", nil, UIParent)
+	slider:SetMinMaxValues(1, 40)
+
+	-- </3
+	local menu = {
+		{
+			{
+				text = "Fiend",
+				value = 0,
+				owner = drop,
+				isTitle = true,
+			}, {
+				text = "Reset",
+				value = 1,
+				owner = drop,
+				func = function()
+					if addon.currentDisplay then
+						addon.currentDisplay:ResetAllBars()
+					end
+				end,
+			}, {
+				text = "Output",
+				value = 2,
+				owner = drop,
+				hasArrow = true,
+				menuList = {
+					{
+						text = "Count",
+						owner = drop,
+						func = function(self)
+							slider:SetPoint("TOPLEFT", self, "TOPLEFT")
+							slider:Show()
+						end,
+					}, {
+						text = "Guild",
+						owner = drop,
+						func = function()
+							if addon.currentDisplay then
+								-- Later make this have a count
+								addon.currentDisplay:Output(slider:GetValue(), "GUILD")
+							end
+						end,
+					}, {
+						text = "Print",
+						value = 0,
+						owner = drop,
+						func = function()
+							print("Hej")
+							if addon.currentDisplay then
+								addon.currentDisplay:Output(slider:GetValue())
+							end
+						end
+					},
+				},
+			}
+		},
+	}
+
+	local init = 0
+	UIDropDownMenu_Initialize(drop, function(self, level, menuList)
+		for k, v in ipairs(menuList or menu[level]) do
+			v.value = k
+			UIDropDownMenu_AddButton(v, level)
+		end
+	end, "MENU", 1)
+
+	self.dropDown = drop
+
+	return drop
 end
 
 _G.Fiend = addon

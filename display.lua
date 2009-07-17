@@ -7,7 +7,7 @@ local OnEnter = function(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
 		tip:AddLine(self.pos .. ". " .. self.name, self.col.r, self.col.g, self.col.b)
-		tip:AddLine(self.total, 1, 1, 1)
+		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.bars[1].total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
 		tip:Show()
 	end
 end
@@ -69,7 +69,7 @@ local Display = setmetatable({}, {
 				bar.right = right
 
 				bar.name = name
-				bar.parent = title
+				bar.parent = t
 				bar.total = 0
 				bar.pos = 0
 				bar.class = class
@@ -94,6 +94,8 @@ function Display:Update(name, ammount)
 	local bar = self.names[name]
 
 	bar.total = bar.total + ammount
+	--bar.per = math.floor(bar.total / self.parent.bars[1].total * 100)
+
 	bar.right:SetText(bar.total)
 
 	self.dirty = true
