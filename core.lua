@@ -61,7 +61,7 @@ function addon:ADDON_LOADED(name)
 		if IsModifiedClick("ALT") and button == "LeftButton" then
 			self:StartMoving()
 		elseif button == "RightButton" then
-			ToggleDropDownMenu(1, nil, addon.dropDown, self, self:GetTop())
+			ToggleDropDownMenu(1, nil, addon.dropDown, self, self:GetLeft(), self:GetTop() * UIParent:GetScale() - addon.dropDown:GetHeight())
 		end
 	end)
 
