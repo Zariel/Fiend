@@ -1,24 +1,27 @@
 local addon = CreateFrame("Frame")
 addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
+addon:RegisterEvent("ADDON_LOADED")
+
 local timer = 0
 local OnUpdate = function(self, elapsed)
 	timer = timer + elapsed
 
-	if timer > 1 then
-		for name, display in pairs(self.displays) do
-			if display.dirty and display.isActive then
-				display:UpdateDisplay()
-			end
+	if timer > 0.5 then
+		if self.currentDisplay and self.currentDisplay.dirty then
+			self.currentDisplay:UpdateDisplay()
 		end
 		timer = 0
 	end
 end
+
 addon:Show()
 
+local ldb
 local band = bit.band
 local filter = COMBATLOG_OBJECT_AFFILIATION_RAID + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_MINE
 
-addon:RegisterEvent("ADDON_LOADED")
+local combatStart = {}
+local combatEnd = {}
 
 local events = {
 	["SWING_DAMAGE"] = 1,
@@ -47,6 +50,7 @@ function addon:ADDON_LOADED(name)
 	frame:SetMovable(true)
 	frame:SetUserPlaced(true)
 	frame:SetClampedToScreen(true)
+
 	frame:SetScript("OnMouseUp", function(self, button)
 		if button == "LeftButton" then
 			self:StopMovingOrSizing()
@@ -80,6 +84,7 @@ function addon:ADDON_LOADED(name)
 
 	self.displays = {}
 	self.displayCount = 0
+	self.combatTime = 0
 
 	local damage = self.Display("Damage", 16)
 	damage:Activate()
@@ -87,7 +92,12 @@ function addon:ADDON_LOADED(name)
 	--self.Display("Healing", 18)
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+
 	self:SetScript("OnUpdate", OnUpdate)
+
+	ldb = LibStub("LibDataBroker-1.1", true)
+	if ldb then
+	end
 
 	self.ADDON_LOADED = nil
 end
@@ -116,6 +126,14 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 		local display
 		if events[event] > 8 then
 			display = self.displays.Healing
+
+			--[[
+			if UnitIsEffectingCombat(sourceName) then
+				combatStart[sourceName] = combatStart[sourceName] or GetTime()
+			elseif combatStart[sourceName] then
+				combatEnd[sourceName] = GetTime()
+			end
+			]]
 		else
 			display = self.displays.Damage
 		end
@@ -124,6 +142,9 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			display:Update(sourceName, damage)
 		end
 	end
+end
+
+function addon:isInCombat(name)
 end
 
 _G.Fiend = addon

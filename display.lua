@@ -2,6 +2,16 @@ local fiend = _G.Fiend
 
 local texture = [[Interface\Addons\Fiend\media\HalV.tga]]
 
+local tip = GameTooltip
+local OnEnter = function(self)
+	if self:IsShown() and self.pos > 0 then
+		tip:SetOwner(self, "ANCHOR_LEFT")
+		tip:AddLine(self.pos .. ". " .. self.name, self.col.r, self.col.g, self.col.b)
+		tip:AddLine(self.total, 1, 1, 1)
+		tip:Show()
+	end
+end
+
 local Display = setmetatable({}, {
 	__call = function(self, title, size)
 		if not fiend.displays[name] then
@@ -19,11 +29,21 @@ local Display = setmetatable({}, {
 				local bar = CreateFrame("Statusbar", nil, fiend.frame)
 				bar:SetStatusBarTexture(texture)
 				bar:SetHeight(size)
-				local col = RAID_CLASS_COLORS[select(2, UnitClass(name)) or "WARRIOR"]
+				local class = select(2, UnitClass(name)) or "WARRIOR"
+				local col = RAID_CLASS_COLORS[class]
 				bar:SetStatusBarColor(col.r, col.g, col.b)
 				bar:SetMinMaxValues(0, 100)
 				bar:SetPoint("LEFT")
 				bar:SetPoint("RIGHT")
+				bar:EnableMouse(true)
+
+				bar:SetScript("OnEnter", OnEnter)
+				bar:SetScript("OnLeave", function(self) tip:Hide() end)
+
+				local bg = bar:CreateTexture(nil, "BACKGROUND")
+				bg:SetTexture(texture)
+				bg:SetVertexColor(col.r, col.g, col.b, 0.2)
+				bg:SetAllPoints(bar)
 
 				local left = bar:CreateFontString(nil, "OVERLAY")
 				left:SetFont(STANDARD_TEXT_FONT, size - 2)
@@ -50,10 +70,10 @@ local Display = setmetatable({}, {
 
 				bar.name = name
 				bar.parent = title
-				bar.toUpdate = 0
-				bar.dirty = false
 				bar.total = 0
 				bar.pos = 0
+				bar.class = class
+				bar.col = col
 
 				table.insert(t.bars, bar)
 				self[name] = bar
@@ -184,16 +204,49 @@ function Display:Activate()
 
 	fiend.frame.title:SetText(self.title)
 
+	fiend.currentDisplay = self
+
 	self.isActive = true
 	self.dirty = true
 end
 
-function Display:Deactivate()
+function Display:Deactivate(clean)
 	if not self.isActive then return end
 
-	self:ResetAllBars()
-
 	self.isActive = false
+
+	if clean then
+		self:ResetAllBars()
+	else
+		local bar
+		for i = 1, #self.bars do
+			bar = self.bars[i]
+			bar:Hide()
+			bar.pos = 0     -- Force update next dirty cycle
+		end
+	end
+
+	fiend.currentDisplay = nil
+end
+
+function Display:Output(count, where, player)
+	if #self.bars == 0 then return end
+
+	local output
+
+	if not where then
+		output = print
+	else
+		output = function(str)
+			SendChatMessage(str, where, nil, where == "WHISPER" and player)
+		end
+	end
+
+	output("Fiend " .. self.title)
+	for i = 1, count or #self.bars do
+		if not self.bars[i] then break end
+		output(i .. ". " .. self.bars[i].name .. "" .. self.bars[i].total)
+	end
 end
 
 fiend.Display = Display
