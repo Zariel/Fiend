@@ -164,7 +164,7 @@ function addon:RAID_MEMBERS_UPDATE()
 
 	for i = 1, GetNumRaidMembers() do
 		unit = "raid" .. i .. "pet"
-		if UnitExists(unit) then
+		if UnitExists(unit) and not UnitInVehicle("raid" .. i) then
 			pets[UnitGUID(unit)] = UnitName("raid" .. i)
 		end
 	end
