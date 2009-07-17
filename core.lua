@@ -16,6 +16,8 @@ end
 
 addon:Show()
 
+local pets = {}
+
 local ldb
 local band = bit.band
 local filter = COMBATLOG_OBJECT_AFFILIATION_RAID + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_MINE
@@ -94,6 +96,9 @@ function addon:ADDON_LOADED(name)
 	--self.Display("Healing", 18)
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	self:RegisterEvent("RAID_MEMBERS_UPDATE")
+	self.UNIT_PET = self.RAID_MEMBERS_UPDATE
+	self:RegisterEvent("UNIT_PET")
 
 	self:SetScript("OnUpdate", OnUpdate)
 
@@ -142,8 +147,25 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			display = self.displays.Damage
 		end
 
+		if pets[sourceGUID] then
+			sourceName = pets[sourceGUID]
+		end
+
 		if display then
 			display:Update(sourceName, damage)
+		end
+	end
+end
+
+-- Just update pet roster
+function addon:RAID_MEMBERS_UPDATE()
+	local unit
+	for k, v in pairs(pets) do pets[k] = nil end
+
+	for i = 1, GetNumRaidMembers() do
+		unit = "raid" .. i .. "pet"
+		if UnitExists(unit) then
+			pets[UnitGUID(unit)] = UnitName("raid" .. i)
 		end
 	end
 end
