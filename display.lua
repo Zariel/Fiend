@@ -14,7 +14,7 @@ end
 
 local pool = setmetatable({}, { __mode = "k" })
 local Display = setmetatable({}, {
-	__call = function(self, title, size)
+	__call = function(self, title, size, bg)
 		if not fiend.displays[name] then
 			local t = setmetatable({}, { __index = self } )
 
@@ -26,6 +26,7 @@ local Display = setmetatable({}, {
 			t.size = size
 			t.title = title
 			t.total = 0
+			t.bg = bg
 
 			t.names = setmetatable({}, { __index = function(self, name)
 				local bar
@@ -124,6 +125,8 @@ function Display:UpdateDisplay()
 
 	local size = self.size
 
+	local max = self.bars[1].total
+
 	local bar
 	for i = 1, #self.bars do
 		bar = self.bars[i]
@@ -131,10 +134,12 @@ function Display:UpdateDisplay()
 			bar.pos = 0
 			bar:Hide()
 		else
-			bar:SetValue(100 * (bar.total / self.total))
+			bar:SetValue(100 * (bar.total / max))
 
 			if bar.pos ~= i then
 				bar:SetPoint("TOP", fiend.frame, "TOP", 0, ((i - 1) * -size) - 32)
+
+				bar.left:SetText(i .. ". " .. bar.name)
 
 				bar.pos = i
 			end
@@ -144,54 +149,6 @@ function Display:UpdateDisplay()
 	end
 
 	self.dirty = false
-end
-
-function Display:ResetBar(name)
-	local bar = self.names[name]
-
-	self.total = self.total - bar.total
-	bar.total = 0
-	bar.pos = 0
-
-	bar.right:SetText(0)
-
-	bar:SetValue(0)
-	bar:Hide()
-
-	self.dirty = true
-end
-
-function Display:ResetAllBars()
-	local bar
-	for i = 1, #self.bars do
-		bar = self.bars[i]
-
-		bar.total = 0
-		bar.pos = 0
-		bar.right:SetText(0)
-		bar.left:SetText("")
-
-		bar:Hide()
-	end
-
-	self.total = 0
-end
-
-function Display:RemoveBar(name)
-	local bar = self.names[name]
-
-	if bar.pos > 0 then
-		table.remove(self.bars, bar.pos)
-	else
-		for i, bars in pairs(self.bars) do
-			table.remove(self.bars, i)
-			break
-		end
-	end
-
-	self:ResetBar(name)
-
-	self.names[name] = nil
 end
 
 function Display:RemoveAllBars()
@@ -234,6 +191,7 @@ function Display:Activate()
 	end
 
 	fiend.frame.title:SetText(self.title)
+	fiend.frame:SetBackdropBorderColor(unpack(self.bg))
 
 	fiend.currentDisplay = self
 

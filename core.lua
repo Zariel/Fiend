@@ -53,6 +53,7 @@ function addon:ADDON_LOADED(name)
 	frame:SetMovable(true)
 	frame:SetUserPlaced(true)
 	frame:SetClampedToScreen(true)
+	--frame:SetHitRectInsets(
 
 	frame:SetScript("OnMouseUp", function(self, button)
 		if button == "LeftButton" then
@@ -64,7 +65,7 @@ function addon:ADDON_LOADED(name)
 		if IsModifiedClick("ALT") and button == "LeftButton" then
 			self:StartMoving()
 		elseif button == "RightButton" then
-			ToggleDropDownMenu(1, nil, addon.dropDown, self, self:GetLeft(), self:GetTop() * UIParent:GetScale() - addon.dropDown:GetHeight())
+			ToggleDropDownMenu(1, nil, addon.dropDown)
 		end
 	end)
 
@@ -75,7 +76,6 @@ function addon:ADDON_LOADED(name)
 	})
 
 	frame:SetBackdropColor(0, 0, 0, 0.8)
-	frame:SetBackdropBorderColor(0.3, 0.3, 0.3)
 
 	self.frame = frame
 
@@ -91,7 +91,7 @@ function addon:ADDON_LOADED(name)
 	self.displayCount = 0
 	self.combatTime = 0
 
-	local damage = self.Display("Damage", 16)
+	local damage = self.Display("Damage", 16, { 0.6, 0.2, 0.2 })
 	damage:Activate()
 
 	--self.Display("Healing", 18)
