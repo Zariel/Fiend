@@ -78,7 +78,7 @@ local Display = setmetatable({}, {
 				bar.bg:SetVertexColor(col.r, col.g, col.b, 0.1)
 
 				bar.left:SetText(name)
-				right:SetText(0)
+				bar.right:SetText(0)
 
 				bar.name = name
 				bar.parent = t
