@@ -196,9 +196,6 @@ end
 function addon:CreateDropDown()
 	local drop = CreateFrame("Frame", "FiendDropDown", UIParent, "UIDropDownMenuTemplate")
 
-	local slider = CreateFrame("Slider", nil, UIParent)
-	slider:SetMinMaxValues(1, 40)
-
 	-- </3
 	local menu = {
 		{
@@ -262,6 +259,7 @@ function addon:CreateDropDown()
 			value = count,
 			func = function()
 				addon.printNum = i
+				print("Set the output limit to " .. i)
 			end
 		}
 	end
