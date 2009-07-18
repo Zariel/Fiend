@@ -226,17 +226,15 @@ function addon:CreateDropDown()
 						text = "Count",
 						owner = drop,
 						hasArrow = true,
-						func = function(self)
-							slider:SetPoint("TOPLEFT", self, "TOPLEFT")
-							slider:Show()
-						end,
+						menuList = {
+						}
 					}, {
 						text = "Guild",
 						owner = drop,
 						func = function()
 							if addon.currentDisplay then
 								-- Later make this have a count
-								addon.currentDisplay:Output(nil, "GUILD")
+								addon.currentDisplay:Output(addon.printNum "GUILD")
 							end
 						end,
 					}, {
@@ -245,7 +243,7 @@ function addon:CreateDropDown()
 						owner = drop,
 						func = function()
 							if addon.currentDisplay then
-								addon.currentDisplay:Output()
+								addon.currentDisplay:Output(addon.printNum)
 							end
 						end
 					},
@@ -253,6 +251,20 @@ function addon:CreateDropDown()
 			}
 		},
 	}
+
+	local count = 0
+	for i = 0, 26, 5 do
+		count = count + 1
+		if i == 0 then i = nil end
+
+		menu[1][3].menuList[1].menuList[count] = {
+			text = i or "All",
+			value = count,
+			func = function()
+				addon.printNum = i
+			end
+		}
+	end
 
 	UIDropDownMenu_Initialize(drop, function(self, level, menuList)
 		if not (menuList or menu[level]) then return end
