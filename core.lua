@@ -32,6 +32,7 @@ local events = {
 	["SPELL_PERIODIC_DAMAGE"] = 8,
 	["SPELL_HEAL"] = 16,
 	["SPELL_PERIDOIC_HEAL"] = 32,
+	["SPELL_SUMMON"] = 64,
 }
 
 local displays = {
@@ -125,6 +126,9 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 
 	if event == "SWING_DAMAGE" then
 		ammount, over, school, resist = ...
+	elseif event == "SPELL_SUMMON" then
+		-- This is to get summoned pets like totems etc
+		pets[destGUID] = sourceName
 	else
 		spellId, spellName, spellSchool, ammount, over, school, resist = ...
 	end
