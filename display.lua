@@ -53,7 +53,6 @@ local Display = setmetatable({}, {
 					left:SetPoint("LEFT", bar, "LEFT", 5, 0)
 					left:SetPoint("BOTTOM")
 					left:SetPoint("TOP")
-					left:SetText(name)
 					left:SetShadowColor(0, 0, 0, 0.8)
 					left:SetShadowOffset(0.8, - 0.8)
 
@@ -65,7 +64,6 @@ local Display = setmetatable({}, {
 					right:SetPoint("TOP")
 					right:SetPoint("BOTTOM")
 					right:SetJustifyH("RIGHT")
-					right:SetText(0)
 					right:SetShadowColor(0, 0, 0, 0.8)
 					right:SetShadowOffset(0.8, - 0.8)
 
@@ -80,6 +78,7 @@ local Display = setmetatable({}, {
 				bar.bg:SetVertexColor(col.r, col.g, col.b, 0.1)
 
 				bar.left:SetText(name)
+				right:SetText(0)
 
 				bar.name = name
 				bar.parent = t
