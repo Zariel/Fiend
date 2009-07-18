@@ -97,12 +97,16 @@ function addon:ADDON_LOADED(name)
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("RAID_MEMBERS_UPDATE")
+	self:RegisterEvent("PARTY_MEMBERS_UPDATE")
 	self.UNIT_PET = self.RAID_MEMBERS_UPDATE
+	self.PARTY_MEMBERS_UPDATE = self.RAID_MEMBERS_UPDATE
 	self:RegisterEvent("UNIT_PET")
 
 	self:SetScript("OnUpdate", OnUpdate)
 
 	self:CreateDropDown()
+
+	self:RAID_MEMBERS_UPDATE()
 
 	ldb = LibStub("LibDataBroker-1.1", true)
 	if ldb then
@@ -159,14 +163,30 @@ end
 
 -- Just update pet roster
 function addon:RAID_MEMBERS_UPDATE()
-	local unit
+	local unit, punit
+
 	for k, v in pairs(pets) do pets[k] = nil end
 
-	for i = 1, GetNumRaidMembers() do
-		unit = "raid" .. i .. "pet"
-		if UnitExists(unit) and not UnitInVehicle("raid" .. i) then
-			pets[UnitGUID(unit)] = UnitName("raid" .. i)
+	if UnitInRaid("player") then
+		for i = 1, GetNumRaidMembers() do
+			unit = "raid" .. i
+			punit = "raid" .. i .. "pet"
+			if UnitExists(punit) and not UnitInVehicle(unit) then
+				pets[UnitGUID(punit)] = UnitName(unit)
+			end
 		end
+	else
+		for i = 1, 4 do
+			unit = "party" .. i
+			punit = unit .. "pet"
+			if UnitExists(punit) and not UnitInVehicle(unit) then
+				pets[UnitGUID(punit)] = UnitName(unit)
+			end
+		end
+	end
+
+	if UnitExists("playerpet") then
+		pets[UnitGUID("playerpet")] = UnitName("player")
 	end
 end
 
