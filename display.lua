@@ -111,9 +111,9 @@ function Display:Update(guid, ammount)
 	bar.total = bar.total + ammount
 	self.total = self.total + ammount
 
-	--bar.per = math.floor(bar.total / self.parent.bars[1].total * 100)
+	bar.per = math.floor(bar.total / self.total * 100)
 
-	bar.right:SetText(bar.total)
+	bar.right:SetText(bar.total .. " (" .. bar.per .. "%)")
 
 	self.dirty = true
 end
@@ -188,7 +188,7 @@ function Display:Activate()
 
 	for k, v in pairs(fiend.displays) do
 		if v.isActive then
-			v.isActive = false
+			v:Deactivate()
 			break
 		end
 	end
