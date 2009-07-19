@@ -12,7 +12,20 @@ local OnEnter = function(self)
 	end
 end
 
-local pool = setmetatable({}, { __mode = "k" })
+local pool = setmetatable({}, {
+	__mode = "k",
+	__newindex = function(self, index, bar)
+		bar.name = nil
+		bar.guid = nil
+		bar.class = nil
+		bar.col = nil
+		bar.total = 0
+		bar.parent = nil
+
+		rawset(self, index, bar)
+	end
+})
+
 local Display = setmetatable({}, {
 	__call = function(self, title, size, bg)
 		if not fiend.displays[title] then
@@ -60,7 +73,7 @@ local Display = setmetatable({}, {
 					bar.left = left
 
 					local right = bar:CreateFontString(nil, "OVERLAY")
-					right:SetFont(STANDARD_TEXT_FONT, 14)
+					right:SetFont(STANDARD_TEXT_FONT, size - 2)
 					right:SetPoint("RIGHT", fiend.frame, "RIGHT", - 5, 0)
 					right:SetPoint("TOP")
 					right:SetPoint("BOTTOM")
@@ -92,7 +105,7 @@ local Display = setmetatable({}, {
 				bar.name = name
 
 				table.insert(t.bars, bar)
-				self[guid] = bar
+				rawset(self, guid, bar)
 
 				bar:Hide()
 
@@ -111,9 +124,9 @@ function Display:Update(guid, ammount)
 	bar.total = bar.total + ammount
 	self.total = self.total + ammount
 
-	bar.per = math.floor(bar.total / self.total * 100)
+	-- bar.per = math.floor(bar.total / self.total * 100)
 
-	bar.right:SetText(bar.total .. " (" .. bar.per .. "%)")
+	bar.right:SetText(bar.total)
 
 	self.dirty = true
 end
