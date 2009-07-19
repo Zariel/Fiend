@@ -153,9 +153,9 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			display = self.displays.Damage
 		end
 
-		local pet = self:IsPet(sourceGuid)
+		local pet = self:IsPet(sourceGUID)
 		if pet then
-			souceGUID = pet
+			sourceGUID = pet
 		end
 
 		if display then
