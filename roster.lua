@@ -82,7 +82,7 @@ function fiend:UNIT_PET(unit)
 		pets[pguid] = guid
 		revPets[guid] = pguid
 	elseif revPets[guid] then
-		pets[rePets[guid]] = nil
+		pets[revPets[guid]] = nil
 		revPets[guid] = nil
 	end
 end
