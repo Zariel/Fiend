@@ -5,6 +5,8 @@ local UnitExists = UnitExists
 local UnitInRaid = UnitInRaid
 local UnitGUID = UnitGUID
 
+local playerGUID
+
 -- owner guid -> pet guid
 local revPets = {}
 -- pet guid -> Owner guid
@@ -39,8 +41,13 @@ local UpdateRoster = function(base, num)
 		unit = base .. i
 
 		if UnitExists(unit) then
-			pet = unit .. "pet"
 			guid = UnitGUID(unit)
+
+			if guid == playerGUID then
+				unit = "player"
+			end
+
+			pet = unit .. "pet"
 
 			units[unit] = guid
 			guids[guid] = unit
@@ -70,12 +77,12 @@ function fiend:PARTY_MEMBERS_CHANGED()
 end
 
 function fiend:PLAYER_ENTERING_WORLD()
-	local guid = UnitGUID("player")
-	units.player = guid
-	guids[guid] = "player"
+	playerGUID = playerGUID or UnitGUID("player")
+
+	units.player = playerGUID
+	guids[playerGUID] = "player"
 
 	self:UNIT_PET("player")
-
 	self:RAID_ROSTER_UPDATE()
 	self:PARTY_MEMBERS_CHANGED()
 end
