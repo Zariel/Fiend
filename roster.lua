@@ -82,20 +82,22 @@ end
 
 function fiend:UNIT_PET(unit)
 	local guid = UnitGUID(unit)
-	if UnitExists(unit .. "pet") then
-		local pguid = UnitGUID(unit .. "pet")
+	local pet = unit .. "pet"
+	if UnitExists(pet) then
+		local pguid = UnitGUID(pet)
 		pets[pguid] = guid
 		revPets[guid] = pguid
 
-		units[unit .. "pet"] = pguid
-		guids[pguid] = unit .. "pet"
+		units[pet] = pguid
+		guids[pguid] = pet
 	elseif revPets[guid] then
 		pets[revPets[guid]] = nil
 		revPets[guid] = nil
 
-		if units[unit .. "pet"] then
-			guids[units[unit .. "pet"]] = nil
-			units[unit .. "pet"] = nil
+		-- Does this still exist here?
+		if units[pet] then
+			guids[units[pet]] = nil
+			units[pet] = nil
 		end
 	end
 end
