@@ -40,6 +40,11 @@ local displays = {
 	[48] = "healing",
 }
 
+local UnitInVehicle = UnitInVehicle
+local UnitExists = UnitExists
+local UnitGUID = UnitGUID
+local UnitName = UnitName
+
 function addon:ADDON_LOADED(name)
 	if name ~= "Fiend" then return end
 
@@ -89,7 +94,9 @@ function addon:ADDON_LOADED(name)
 
 	self.displays = {}
 	self.displayCount = 0
-	self.combatTime = 0
+	self.combatTime = {}
+	self.combatStart = {}
+	self.combatEnd = {}
 
 	local damage = self.Display("Damage", 16, { 0.6, 0.2, 0.2 })
 	damage:Activate()
@@ -120,7 +127,7 @@ local spellId, spellName, spellSchool, ammount, over, school, resist
 function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
 	if not events[event] then return end
 
-	if band(sourceFlags, filter) == 0 then
+	if band(sourceFlags, filter) == 0 or UnitInVehicle(sourceName) then
 		return
 	end
 
@@ -145,7 +152,7 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			display = self.displays.Healing
 
 			--[[
-			if UnitIsEffectingCombat(sourceName) then
+			if UnitAffectingCombat(sourceName) then
 				combatStart[sourceName] = combatStart[sourceName] or GetTime()
 			elseif combatStart[sourceName] then
 				combatEnd[sourceName] = GetTime()
@@ -258,13 +265,15 @@ function addon:CreateDropDown()
 		count = count + 1
 		if i == 0 then i = nil end
 
+		local disabled = i and self.printNum == i or not self.printNum
 		menu[1][3].menuList[1].menuList[count] = {
 			text = i or "All",
 			value = count,
 			func = function()
 				addon.printNum = i
 				print("Set the output limit to " .. i)
-			end
+			end,
+			disabled = disabled
 		}
 	end
 
