@@ -6,7 +6,7 @@ local tip = GameTooltip
 local OnEnter = function(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
-		tip:AddLine(self.pos .. ". " .. self.guid, self.col.r, self.col.g, self.col.b)
+		tip:AddLine(self.pos .. ". " .. self.name, self.col.r, self.col.g, self.col.b)
 		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
 		tip:Show()
 	end
@@ -15,7 +15,7 @@ end
 local pool = setmetatable({}, { __mode = "k" })
 local Display = setmetatable({}, {
 	__call = function(self, title, size, bg)
-		if not fiend.displays[guid] then
+		if not fiend.displays[title] then
 			local t = setmetatable({}, { __index = self } )
 
 			fiend.displayCount = fiend.displayCount + 1
@@ -71,9 +71,10 @@ local Display = setmetatable({}, {
 					bar.right = right
 				end
 
-				local class = select(2, UnitClass(guid)) or "WARRIOR"
+				local unit = self:GetUnit(guid)
+				local class = select(2, UnitClass(unit)) or "WARRIOR"
 				local col = RAID_CLASS_COLORS[class]
-				local name = UnitName(self:GetUnit(guid))
+				local name = UnitName(unit)
 
 				bar:SetHeight(size)
 				bar:SetStatusBarColor(col.r, col.g, col.b)
@@ -141,7 +142,7 @@ function Display:UpdateDisplay()
 			if bar.pos ~= i then
 				bar:SetPoint("TOP", fiend.frame, "TOP", 0, ((i - 1) * -size) - 32)
 
-				bar.left:SetText(i .. ". " .. bar.guid)
+				bar.left:SetText(i .. ". " .. bar.name)
 
 				bar.pos = i
 			end
@@ -236,7 +237,7 @@ function Display:Output(count, where, player)
 	output("Fiend " .. self.title)
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
-		output(i .. ". " .. self.bars[i].guid .. "" .. self.bars[i].total)
+		output(i .. ". " .. self.bars[i].name .. "" .. self.bars[i].total)
 	end
 end
 
