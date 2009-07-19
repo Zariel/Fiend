@@ -102,11 +102,6 @@ function addon:ADDON_LOADED(name)
 	--self.Display("Healing", 18)
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	self:RegisterEvent("RAID_MEMBERS_UPDATE")
-	self:RegisterEvent("PARTY_MEMBERS_UPDATE")
-	self.UNIT_PET = self.RAID_MEMBERS_UPDATE
-	self.PARTY_MEMBERS_UPDATE = self.RAID_MEMBERS_UPDATE
-	self:RegisterEvent("UNIT_PET")
 
 	self:SetScript("OnUpdate", OnUpdate)
 
