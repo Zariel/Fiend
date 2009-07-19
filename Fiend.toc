@@ -1,4 +1,5 @@
 ## Interface: 310000
 
 core.lua
+roster.lua
 display.lua
