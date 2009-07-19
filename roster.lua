@@ -81,6 +81,9 @@ function fiend:UNIT_PET(unit)
 		local pguid = UnitGUID(unit .. "pet")
 		pets[pguid] = guid
 		revPets[guid] = pguid
+
+		units[unit .. "pet"] = pguid
+		guids[pguid] = unit .. "pet"
 	elseif revPets[guid] then
 		pets[revPets[guid]] = nil
 		revPets[guid] = nil
