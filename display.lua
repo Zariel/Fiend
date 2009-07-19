@@ -6,7 +6,7 @@ local tip = GameTooltip
 local OnEnter = function(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
-		tip:AddLine(self.pos .. ". " .. self.name, self.col.r, self.col.g, self.col.b)
+		tip:AddLine(self.pos .. ". " .. self.guid, self.col.r, self.col.g, self.col.b)
 		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
 		tip:Show()
 	end
@@ -15,7 +15,7 @@ end
 local pool = setmetatable({}, { __mode = "k" })
 local Display = setmetatable({}, {
 	__call = function(self, title, size, bg)
-		if not fiend.displays[name] then
+		if not fiend.displays[guid] then
 			local t = setmetatable({}, { __index = self } )
 
 			fiend.displayCount = fiend.displayCount + 1
@@ -28,7 +28,7 @@ local Display = setmetatable({}, {
 			t.total = 0
 			t.bg = bg
 
-			t.names = setmetatable({}, { __index = function(self, name)
+			t.guids = setmetatable({}, { __index = function(self, guid)
 				local bar
 				if next(pool) then
 					bar = table.remove(pool, 1)
@@ -71,8 +71,9 @@ local Display = setmetatable({}, {
 					bar.right = right
 				end
 
-				local class = select(2, UnitClass(name)) or "WARRIOR"
+				local class = select(2, UnitClass(guid)) or "WARRIOR"
 				local col = RAID_CLASS_COLORS[class]
+				local name = UnitName(self:GetUnit(guid))
 
 				bar:SetHeight(size)
 				bar:SetStatusBarColor(col.r, col.g, col.b)
@@ -81,15 +82,16 @@ local Display = setmetatable({}, {
 				bar.left:SetText(name)
 				bar.right:SetText(0)
 
-				bar.name = name
+				bar.guid = guid
 				bar.parent = t
 				bar.total = 0
 				bar.pos = 0
 				bar.class = class
 				bar.col = col
+				bar.name = name
 
 				table.insert(t.bars, bar)
-				self[name] = bar
+				self[guid] = bar
 
 				bar:Hide()
 
@@ -102,8 +104,8 @@ local Display = setmetatable({}, {
 		return fiend.displays[title]
 end})
 
-function Display:Update(name, ammount)
-	local bar = self.names[name]
+function Display:Update(guid, ammount)
+	local bar = self.guids[guid]
 
 	bar.total = bar.total + ammount
 	self.total = self.total + ammount
@@ -139,7 +141,7 @@ function Display:UpdateDisplay()
 			if bar.pos ~= i then
 				bar:SetPoint("TOP", fiend.frame, "TOP", 0, ((i - 1) * -size) - 32)
 
-				bar.left:SetText(i .. ". " .. bar.name)
+				bar.left:SetText(i .. ". " .. bar.guid)
 
 				bar.pos = i
 			end
@@ -158,7 +160,7 @@ function Display:RemoveAllBars()
 
 		bar:Hide()
 
-		self.names[bar.name] = nil
+		self.guids[bar.guid] = nil
 
 		table.insert(pool, bar)
 	end
@@ -234,7 +236,7 @@ function Display:Output(count, where, player)
 	output("Fiend " .. self.title)
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
-		output(i .. ". " .. self.bars[i].name .. "" .. self.bars[i].total)
+		output(i .. ". " .. self.bars[i].guid .. "" .. self.bars[i].total)
 	end
 end
 
