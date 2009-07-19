@@ -96,3 +96,7 @@ fiend:RegisterEvent("UNIT_PET")
 function fiend:IsPet(guid)
 	return pets[guid]
 end
+
+function fiend:GetUnit(guid)
+	return guids[guid]
+end
