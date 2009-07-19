@@ -112,7 +112,7 @@ function fiend:IsPet(guid)
 end
 
 function fiend:GetUnit(guid)
-	return guids[guid]
+	return pets[guid] and guids[pets[guid]] or guids[guid]
 end
 
 function fiend:AddPet(guid, parent)
