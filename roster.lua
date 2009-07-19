@@ -102,7 +102,7 @@ function fiend:UNIT_PET(unit)
 	end
 end
 
-fiend:RegisterEvent("RAID_MEMBERS_UPDATE")
+fiend:RegisterEvent("RAID_ROSTER_UPDATE")
 fiend:RegisterEvent("PARTY_MEMBERS_UPDATE")
 fiend:RegisterEvent("PLAYER_ENTERING_WORLD")
 fiend:RegisterEvent("UNIT_PET")
