@@ -71,7 +71,7 @@ local Display = setmetatable({}, {
 					bar.right = right
 				end
 
-				local unit = self:GetUnit(guid)
+				local unit = fiend:GetUnit(guid)
 				local class = select(2, UnitClass(unit)) or "WARRIOR"
 				local col = RAID_CLASS_COLORS[class]
 				local name = UnitName(unit)
