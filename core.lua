@@ -118,7 +118,7 @@ local spellId, spellName, spellSchool, ammount, over, school, resist
 function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
 	if not events[event] then return end
 
-	if band(sourceFlags, filter) == 0 or UnitInVehicle(sourceName) then
+	if band(sourceFlags, filter) == 0 then
 		return
 	end
 
@@ -130,6 +130,8 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	else
 		spellId, spellName, spellSchool, ammount, over, school, resist = ...
 	end
+
+	if not self:GetUnit(sourceGUID) then return end
 
 	ammount = ammount or 0
 	resist = resist or 0
