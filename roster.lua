@@ -67,6 +67,14 @@ local UpdatePartyRoster = function(self)
 	UpdateRoster("party", 4)
 end
 
+function fiend:PLAYER_ENTERING_WORLD()
+	local guid = UnitGUID("player")
+	units.player = guid
+	guids[guid] = "player"
+
+	self:UNIT_PET("player")
+end
+
 function fiend:UNIT_PET(unit)
 	local guid = UnitGUID(unit)
 	if UnitExists(unit .. "pet") then
@@ -79,18 +87,11 @@ function fiend:UNIT_PET(unit)
 	end
 end
 
-do
-	local guid = UnitGUID("player")
-	units["player"] = guid
-	guids[guid] = "player"
-
-	fiend:UNIT_PET("player")
-end
-
 fiend.RAID_ROSTER_UPDATE = UpdateRoster
 fiend.PARTY_MEMBERS_CHANGED = UpdateRoster
 fiend:RegisterEvent("RAID_MEMBERS_UPDATE")
 fiend:RegisterEvent("PARTY_MEMBERS_UPDATE")
+fiend:RegisterEvent("PLAYER_ENTERING_WORLD")
 fiend:RegisterEvent("UNIT_PET")
 
 function fiend:IsPet(guid)
@@ -105,3 +106,4 @@ function fiend:AddPet(guid, parent)
 	pets[guid] = parent
 	revPets[parent] = guid
 end
+
