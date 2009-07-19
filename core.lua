@@ -16,8 +16,6 @@ end
 
 addon:Show()
 
-local pets = {}
-
 local ldb
 local band = bit.band
 local filter = COMBATLOG_OBJECT_AFFILIATION_RAID + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_MINE
@@ -135,7 +133,7 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 		ammount, over, school, resist = ...
 	elseif event == "SPELL_SUMMON" then
 		-- This is to get summoned pets like totems etc
-		pets[destGUID] = sourceName
+		return self:AddPet(destGUID, sourceGUID)
 	else
 		spellId, spellName, spellSchool, ammount, over, school, resist = ...
 	end

@@ -100,3 +100,8 @@ end
 function fiend:GetUnit(guid)
 	return guids[guid]
 end
+
+function fiend:AddPet(guid, parent)
+	pets[guid] = parent
+	revPets[parent] = guid
+end
