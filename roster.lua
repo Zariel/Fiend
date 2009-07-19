@@ -20,13 +20,15 @@ local Clean = function(base, num)
 		unit = base .. i
 		guid = guids[unit]
 
-		if revPets[guid] then
-			pets[revPets[guid]] = nil
-			revPets[guid] = nil
-		end
+		if guid then
+			if revPets[guid] then
+				pets[revPets[guid]] = nil
+				revPets[guid] = nil
+			end
 
-		guids[guid] = nil
-		units[unit] = nil
+			guids[guid] = nil
+			units[unit] = nil
+		end
 	end
 end
 
@@ -91,8 +93,10 @@ function fiend:UNIT_PET(unit)
 		pets[revPets[guid]] = nil
 		revPets[guid] = nil
 
-		guids[units[unit .. "pet"]] = nil
-		units[unit .. "pet"] = nil
+		if units[unit .. "pet"] then
+			guids[units[unit .. "pet"]] = nil
+			units[unit .. "pet"] = nil
+		end
 	end
 end
 
@@ -113,4 +117,3 @@ function fiend:AddPet(guid, parent)
 	pets[guid] = parent
 	revPets[parent] = guid
 end
-
