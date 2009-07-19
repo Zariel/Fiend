@@ -96,6 +96,8 @@ function addon:ADDON_LOADED(name)
 	self.combatStart = {}
 	self.combatEnd = {}
 
+	self.printNum = nil
+
 	local damage = self.Display("Damage", 16, { 0.6, 0.2, 0.2 })
 	damage:Activate()
 
@@ -204,7 +206,7 @@ function addon:CreateDropDown()
 						func = function()
 							if addon.currentDisplay then
 								-- Later make this have a count
-								addon.currentDisplay:Output(addon.printNum "GUILD")
+								addon.currentDisplay:Output(addon.printNum, "GUILD")
 							end
 						end,
 					}, {
@@ -227,15 +229,14 @@ function addon:CreateDropDown()
 		count = count + 1
 		if i == 0 then i = nil end
 
-		local disabled = i and self.printNum == i or not self.printNum
+		local disabled = self.printNum == i
 		menu[1][3].menuList[1].menuList[count] = {
 			text = i or "All",
 			value = count,
 			func = function()
 				addon.printNum = i
-				print("Set the output limit to " .. i)
+				print("Set the output limit to " .. i or "All")
 			end,
-			disabled = disabled
 		}
 	end
 
