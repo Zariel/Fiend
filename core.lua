@@ -112,8 +112,6 @@ function addon:ADDON_LOADED(name)
 
 	self:CreateDropDown()
 
-	self:RAID_MEMBERS_UPDATE()
-
 	ldb = LibStub("LibDataBroker-1.1", true)
 	if ldb then
 	end
