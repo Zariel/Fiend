@@ -126,3 +126,7 @@ function fiend:AddPet(guid, parent)
 	pets[guid] = parent
 	revPets[parent] = guid
 end
+
+function fiend:IterateUnitRoster()
+	return next, units, nil
+end
