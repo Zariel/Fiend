@@ -82,7 +82,7 @@ end
 do
 	local guid = UnitGUID("player")
 	units["player"] = guid
-	guid[guid] = "player"
+	guids[guid] = "player"
 
 	fiend:UNIT_PET("player")
 end
