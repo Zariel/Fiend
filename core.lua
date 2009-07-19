@@ -10,6 +10,21 @@ local OnUpdate = function(self, elapsed)
 		if self.currentDisplay and self.currentDisplay.dirty then
 			self.currentDisplay:UpdateDisplay()
 		end
+
+		-- Dont throttle this ?
+		for unit, guid in self:IterateUnitRoster() do
+			if UnitAffectingCombat(unit) then
+				self.inCombat[guid] = true
+				self.combatTime[guid] = (self.combatTime[guid] or 0) + timer
+			elseif self.inCombat[guid] then
+				self.inCombat[guid] = false
+			end
+		end
+
+		if self.currentDisplay.tip then
+			self.OnEnter(GameTooltip:GetOwner())
+		end
+
 		timer = 0
 	end
 end
@@ -92,9 +107,9 @@ function addon:ADDON_LOADED(name)
 
 	self.displays = {}
 	self.displayCount = 0
+
 	self.combatTime = {}
-	self.combatStart = {}
-	self.combatEnd = {}
+	self.inCombat = {}
 
 	self.printNum = nil
 
@@ -133,6 +148,8 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 		spellId, spellName, spellSchool, ammount, over, school, resist = ...
 	end
 
+	-- Bail, ususaly because the unit is in a vehicle and we dont have its
+	-- GUID mapping
 	if not self:GetUnit(sourceGUID) then return end
 
 	ammount = ammount or 0
@@ -165,6 +182,20 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 		if display then
 			display:Update(sourceGUID, damage)
 		end
+	end
+end
+
+function addon:CHAT_MSG_ADDON(prefix, msg, chan, from)
+	if not prefix:match("Fiend") then return end
+
+	local guid, time = msg:split(";")
+	self.sync[guid] = true
+
+	if prefix == "FiendCombatStart" then
+		self.combatStart[guid] = tonumber(time)
+	elseif prefix == "FiendCombatStop" then
+		self.combatStop[guid] = tonumber(time)
+	elseif prefix == "FiendCombatSync" then
 	end
 end
 

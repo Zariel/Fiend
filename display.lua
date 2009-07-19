@@ -2,15 +2,29 @@ local fiend = _G.Fiend
 
 local texture = [[Interface\Addons\Fiend\media\HalV.tga]]
 
+local floor = math.floor
+
+local GetDPS = function(self)
+	if fiend.combatTime[self.guid] > 0 then
+		return floor(self.total / fiend.combatTime[self.guid])
+	else
+		return 0
+	end
+end
+
 local tip = GameTooltip
 local OnEnter = function(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
-		tip:AddLine(self.pos .. ". " .. self.name, self.col.r, self.col.g, self.col.b)
+		tip:AddDoubleLine(self.pos .. ". " .. self.name, GetDPS(self) .. " dps", self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
 		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
+
 		tip:Show()
+		self.parent.tip = true
 	end
 end
+
+fiend.OnEnter = OnEnter
 
 local pool = setmetatable({}, {
 	__mode = "k",
@@ -54,7 +68,7 @@ local Display = setmetatable({}, {
 					bar:EnableMouse(true)
 
 					bar:SetScript("OnEnter", OnEnter)
-					bar:SetScript("OnLeave", function(self) tip:Hide() end)
+					bar:SetScript("OnLeave", function(self) tip:Hide(); self.parent.tip = false end)
 
 					local bg = bar:CreateTexture(nil, "BACKGROUND")
 					bg:SetTexture(texture)
@@ -103,6 +117,8 @@ local Display = setmetatable({}, {
 				bar.class = class
 				bar.col = col
 				bar.name = name
+
+				fiend.combatTime[guid] = 0
 
 				table.insert(t.bars, bar)
 				rawset(self, guid, bar)
