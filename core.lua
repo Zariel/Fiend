@@ -162,46 +162,14 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			display = self.displays.Damage
 		end
 
-		if pets[sourceGUID] then
-			sourceName = pets[sourceGUID]
+		local pet = self:IsPet(sourceGuid) then
+			souceGUID = pets[sourceGUID]
 		end
 
 		if display then
-			display:Update(sourceName, damage)
+			display:Update(sourceGUID, damage)
 		end
 	end
-end
-
--- Just update pet roster
-function addon:RAID_MEMBERS_UPDATE()
-	local unit, punit
-
-	for k, v in pairs(pets) do pets[k] = nil end
-
-	if UnitInRaid("player") then
-		for i = 1, GetNumRaidMembers() do
-			unit = "raid" .. i
-			punit = "raid" .. i .. "pet"
-			if UnitExists(punit) and not UnitInVehicle(unit) then
-				pets[UnitGUID(punit)] = UnitName(unit)
-			end
-		end
-	else
-		for i = 1, 4 do
-			unit = "party" .. i
-			punit = unit .. "pet"
-			if UnitExists(punit) and not UnitInVehicle(unit) then
-				pets[UnitGUID(punit)] = UnitName(unit)
-			end
-		end
-	end
-
-	if UnitExists("playerpet") then
-		pets[UnitGUID("playerpet")] = UnitName("player")
-	end
-end
-
-function addon:isInCombat(name)
 end
 
 function addon:CreateDropDown()
