@@ -51,7 +51,7 @@ local UpdateRoster = function(base, num)
 	end
 end
 
-local UpdateRaidRoster = function(self)
+function fiend:RAID_ROSTER_UPDATE()
 	if not UnitInRaid("player") then
 		return Clean("raid", 40)
 	end
@@ -59,7 +59,7 @@ local UpdateRaidRoster = function(self)
 	UpdateRoster("raid", 40)
 end
 
-local UpdatePartyRoster = function(self)
+function fiend:PARTY_MEMBERS_CHANGED()
 	if not UnitExists("party1") then
 		return Clean("party", 4)
 	end
@@ -73,6 +73,9 @@ function fiend:PLAYER_ENTERING_WORLD()
 	guids[guid] = "player"
 
 	self:UNIT_PET("player")
+
+	self:RAID_ROSTER_UPDATE()
+	self:PARTY_MEMBERS_CHANGED()
 end
 
 function fiend:UNIT_PET(unit)
@@ -93,8 +96,6 @@ function fiend:UNIT_PET(unit)
 	end
 end
 
-fiend.RAID_ROSTER_UPDATE = UpdateRoster
-fiend.PARTY_MEMBERS_CHANGED = UpdateRoster
 fiend:RegisterEvent("RAID_MEMBERS_UPDATE")
 fiend:RegisterEvent("PARTY_MEMBERS_UPDATE")
 fiend:RegisterEvent("PLAYER_ENTERING_WORLD")
