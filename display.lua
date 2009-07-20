@@ -192,6 +192,9 @@ function Display:RemoveAllBars()
 
 		self.guids[bar.guid] = nil
 
+		fiend.inCombat[bar.guid] = nil
+		fiend.combatTime[bar.guid] = 0
+
 		table.insert(pool, bar)
 	end
 
@@ -264,6 +267,7 @@ function Display:Output(count, where, player)
 	end
 
 	output("Fiend " .. self.title)
+
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
 		output(i .. ". " .. self.bars[i].name .. "" .. self.bars[i].total)

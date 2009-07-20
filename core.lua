@@ -2,6 +2,12 @@ local addon = CreateFrame("Frame")
 addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
 addon:RegisterEvent("ADDON_LOADED")
 
+local UnitAffectingCombat = UnitAffectingCombat
+local UnitInVehicle = UnitInVehicle
+local UnitExists = UnitExists
+local UnitGUID = UnitGUID
+local UnitName = UnitName
+
 local timer = 0
 local OnUpdate = function(self, elapsed)
 	timer = timer + elapsed
@@ -35,28 +41,17 @@ local ldb
 local band = bit.band
 local filter = COMBATLOG_OBJECT_AFFILIATION_RAID + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_MINE
 
-local combatStart = {}
-local combatEnd = {}
-
 local events = {
-	["SWING_DAMAGE"] = 1,
-	["RANGE_DAMAGE"] = 2,
-	["SPELL_DAMAGE"] = 4,
-	["SPELL_PERIODIC_DAMAGE"] = 8,
-	["SPELL_HEAL"] = 16,
-	["SPELL_PERIDOIC_HEAL"] = 32,
-	["SPELL_SUMMON"] = 64,
-}
+	["SWING_DAMAGE"] = "Damage",
+	["RANGE_DAMAGE"] = "Damage",
+	["SPELL_DAMAGE"] = "Damage",
+	["SPELL_PERIODIC_DAMAGE"] = "Damage",
 
-local displays = {
-	[15] = "damage",
-	[48] = "healing",
-}
+	["SPELL_HEAL"] = "Healing",
+	["SPELL_PERIDOIC_HEAL"] = "Healing",
 
-local UnitInVehicle = UnitInVehicle
-local UnitExists = UnitExists
-local UnitGUID = UnitGUID
-local UnitName = UnitName
+	["SPELL_SUMMON"] = true,
+}
 
 function addon:ADDON_LOADED(name)
 	if name ~= "Fiend" then return end
@@ -83,7 +78,11 @@ function addon:ADDON_LOADED(name)
 		if IsModifiedClick("ALT") and button == "LeftButton" then
 			self:StartMoving()
 		elseif button == "RightButton" then
-			ToggleDropDownMenu(1, nil, addon.dropDown, self)
+			if IsModifiedClick("SHIFT") then
+				self.currentDisplay:RemoveAllBars()
+			else
+				ToggleDropDownMenu(1, nil, addon.dropDown, self)
+			end
 		end
 	end)
 
@@ -159,27 +158,14 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	local damage = ammount - (over + resist)
 
 	if damage > 0 then
-		local display
-		if events[event] > 8 then
-			display = self.displays.Healing
-
-			--[[
-			if UnitAffectingCombat(sourceName) then
-				combatStart[sourceName] = combatStart[sourceName] or GetTime()
-			elseif combatStart[sourceName] then
-				combatEnd[sourceName] = GetTime()
-			end
-			]]
-		else
-			display = self.displays.Damage
-		end
-
-		local pet = self:IsPet(sourceGUID)
-		if pet then
-			sourceGUID = pet
-		end
-
+		local display = self.displays[events[event]]
 		if display then
+
+			local pet = self:IsPet(sourceGUID)
+			if pet then
+				sourceGUID = pet
+			end
+
 			display:Update(sourceGUID, damage)
 		end
 	end
