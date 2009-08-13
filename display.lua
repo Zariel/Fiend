@@ -173,9 +173,11 @@ function Display:Output(count, where, player)
 
 	output("Fiend " .. self.title)
 
+	local bar
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
-		output(i .. ". " .. self.bars[i].name .. "  " .. self.bars[i].total .. "\t(" .. GetDPS(self.bars[i]) .. ")")
+		bar = self.bars[i]
+		output(string.format("%d. %s [%d] \t(%d)", i, bar.name, bar.total, GetDPS(bar)))
 	end
 end
 

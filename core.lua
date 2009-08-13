@@ -81,7 +81,7 @@ function addon:ADDON_LOADED(name)
 			if IsModifiedClick("SHIFT") then
 				self.currentDisplay:RemoveAllBars()
 			else
-				ToggleDropDownMenu(1, nil, addon.dropDown, self)
+				ToggleDropDownMenu(1, nil, addon.dropDown, "cursor")
 			end
 		end
 	end)
@@ -228,20 +228,27 @@ function addon:CreateDropDown()
 	}
 
 	local count = 0
-	for i = 0, 26, 5 do
+	for i = 1, 26, 5 do
 		count = count + 1
-		if i == 0 then i = nil end
 
-		local disabled = self.printNum == i
 		menu[1][3].menuList[1].menuList[count] = {
 			text = i or "All",
 			value = count,
 			func = function()
 				addon.printNum = i
-				print("Set the output limit to " .. i or "All")
+				print("Set the output limit to " .. i)
 			end,
 		}
 	end
+
+	menu[1][3].menuList[1].menuList[count + 1] = {
+		text = "All",
+		value = count + 1,
+		func = function()
+			addon.printNum = nil
+			print("Set the output limit to All")
+		end,
+	}
 
 	UIDropDownMenu_Initialize(drop, function(self, level, menuList)
 		if not (menuList or menu[level]) then return end
