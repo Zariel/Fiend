@@ -40,99 +40,7 @@ local pool = setmetatable({}, {
 	end
 })
 
-local Display = setmetatable({}, {
-	__call = function(self, title, size, bg)
-		if not fiend.displays[title] then
-			local t = setmetatable({}, { __index = self } )
-
-			fiend.displayCount = fiend.displayCount + 1
-
-			t.bars = {}
-			t.max = 0
-			t.isActive = false
-			t.size = size
-			t.title = title
-			t.total = 0
-			t.bg = bg
-
-			t.guids = setmetatable({}, { __index = function(self, guid)
-				local bar
-				if next(pool) then
-					bar = table.remove(pool, 1)
-				else
-					bar = CreateFrame("Statusbar", nil, fiend.frame)
-					bar:SetStatusBarTexture(texture)
-					bar:SetMinMaxValues(0, 100)
-					bar:SetPoint("LEFT")
-					bar:SetPoint("RIGHT")
-					bar:EnableMouse(true)
-
-					bar:SetScript("OnEnter", OnEnter)
-					bar:SetScript("OnLeave", function(self) tip:Hide(); self.parent.tip = false end)
-
-					local bg = bar:CreateTexture(nil, "BACKGROUND")
-					bg:SetTexture(texture)
-					bg:SetAllPoints(bar)
-
-					bar.bg = bg
-
-					local left = bar:CreateFontString(nil, "OVERLAY")
-					left:SetFont(STANDARD_TEXT_FONT, size - 2)
-					left:SetPoint("LEFT", bar, "LEFT", 5, 0)
-					left:SetPoint("BOTTOM")
-					left:SetPoint("TOP")
-					left:SetShadowColor(0, 0, 0, 0.8)
-					left:SetShadowOffset(0.8, - 0.8)
-
-					bar.left = left
-
-					local right = bar:CreateFontString(nil, "OVERLAY")
-					right:SetFont(STANDARD_TEXT_FONT, size - 2)
-					right:SetPoint("RIGHT", fiend.frame, "RIGHT", - 5, 0)
-					right:SetPoint("TOP")
-					right:SetPoint("BOTTOM")
-					right:SetJustifyH("RIGHT")
-					right:SetShadowColor(0, 0, 0, 0.8)
-					right:SetShadowOffset(0.8, - 0.8)
-
-					bar.right = right
-				end
-
-				local unit = fiend:GetUnit(guid)
-				local class = select(2, UnitClass(unit)) or "WARRIOR"
-				local col = RAID_CLASS_COLORS[class]
-				local name = UnitName(unit)
-
-				bar:SetHeight(size)
-				bar:SetStatusBarColor(col.r, col.g, col.b)
-				bar.bg:SetVertexColor(col.r, col.g, col.b, 0.1)
-
-				bar.left:SetText(name)
-				bar.right:SetText(0)
-
-				bar.guid = guid
-				bar.parent = t
-				bar.total = 0
-				bar.pos = 0
-				bar.class = class
-				bar.col = col
-				bar.name = name
-
-				fiend.combatTime[guid] = 0
-
-				table.insert(t.bars, bar)
-				rawset(self, guid, bar)
-
-				bar:Hide()
-
-				return bar
-			end})
-
-			fiend.displays[title] = t
-		end
-
-		return fiend.displays[title]
-end})
+local Display = {}
 
 function Display:Update(guid, ammount)
 	local bar = self.guids[guid]
@@ -218,11 +126,8 @@ end
 function Display:Activate()
 	if self.isActive then return end
 
-	for k, v in pairs(fiend.displays) do
-		if v.isActive then
-			v:Deactivate()
-			break
-		end
+	if fiend.currentDisplay then
+		fiend.currentDispay:Deactivate()
 	end
 
 	fiend.frame.title:SetText(self.title)
@@ -270,8 +175,99 @@ function Display:Output(count, where, player)
 
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
-		output(i .. ". " .. self.bars[i].name .. "" .. self.bars[i].total)
+		output(i .. ". " .. self.bars[i].name .. "  " .. self.bars[i].total .. "\t(" .. GetDPS(self.bars[i]) .. ")")
 	end
 end
 
-fiend.Display = Display
+fiend.Display = setmetatable({}, { __call = function(self, title, size, bg)
+	if not fiend.displays[title] then
+		local t = setmetatable({}, { __index = Display } )
+
+		fiend.displayCount = fiend.displayCount + 1
+
+		t.bars = {}
+		t.max = 0
+		t.isActive = false
+		t.size = size
+		t.title = title
+		t.total = 0
+		t.bg = bg or { 0.3, 0.3, 0.3 }
+
+		t.guids = setmetatable({}, { __index = function(self, guid)
+			local bar
+			if next(pool) then
+				bar = table.remove(pool, 1)
+			else
+				bar = CreateFrame("Statusbar", nil, fiend.frame)
+				bar:SetStatusBarTexture(texture)
+				bar:SetMinMaxValues(0, 100)
+				bar:SetPoint("LEFT", 1, 0)
+				bar:SetPoint("RIGHT", - 1, 0)
+				bar:EnableMouse(true)
+
+				bar:SetScript("OnEnter", OnEnter)
+				bar:SetScript("OnLeave", function(self) tip:Hide(); self.parent.tip = false end)
+
+				local bg = bar:CreateTexture(nil, "BACKGROUND")
+				bg:SetTexture(texture)
+				bg:SetAllPoints(bar)
+
+				bar.bg = bg
+
+				local left = bar:CreateFontString(nil, "OVERLAY")
+				left:SetFont(STANDARD_TEXT_FONT, size - 2)
+				left:SetPoint("LEFT", bar, "LEFT", 5, 0)
+				left:SetPoint("BOTTOM")
+				left:SetPoint("TOP")
+				left:SetShadowColor(0, 0, 0, 0.8)
+				left:SetShadowOffset(0.8, - 0.8)
+
+				bar.left = left
+
+				local right = bar:CreateFontString(nil, "OVERLAY")
+				right:SetFont(STANDARD_TEXT_FONT, size - 2)
+				right:SetPoint("RIGHT", fiend.frame, "RIGHT", - 5, 0)
+				right:SetPoint("TOP")
+				right:SetPoint("BOTTOM")
+				right:SetJustifyH("RIGHT")
+				right:SetShadowColor(0, 0, 0, 0.8)
+				right:SetShadowOffset(0.8, - 0.8)
+
+				bar.right = right
+			end
+
+			local unit = fiend:GetUnit(guid)
+			local class = select(2, UnitClass(unit)) or "WARRIOR"
+			local col = RAID_CLASS_COLORS[class]
+			local name = UnitName(unit)
+
+			bar:SetHeight(size)
+			bar:SetStatusBarColor(col.r, col.g, col.b)
+			bar.bg:SetVertexColor(col.r, col.g, col.b, 0.1)
+
+			bar.left:SetText(name)
+			bar.right:SetText(0)
+
+			bar.guid = guid
+			bar.parent = t
+			bar.total = 0
+			bar.pos = 0
+			bar.class = class
+			bar.col = col
+			bar.name = name
+
+			fiend.combatTime[guid] = 0
+
+			table.insert(t.bars, bar)
+			rawset(self, guid, bar)
+
+			bar:Hide()
+
+			return bar
+		end})
+
+		fiend.displays[title] = t
+	end
+
+	return fiend.displays[title]
+end})

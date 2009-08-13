@@ -27,7 +27,7 @@ local OnUpdate = function(self, elapsed)
 			end
 		end
 
-		if self.currentDisplay.tip then
+		if self.currentDisplay and self.currentDisplay.tip then
 			self.OnEnter(GameTooltip:GetOwner())
 		end
 
@@ -115,7 +115,7 @@ function addon:ADDON_LOADED(name)
 	local damage = self.Display("Damage", 16, { 0.6, 0.2, 0.2 })
 	damage:Activate()
 
-	--self.Display("Healing", 18)
+	self.Display("Healing", 16, { 0.2, 0.6, 0.2 })
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
@@ -168,20 +168,6 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 
 			display:Update(sourceGUID, damage)
 		end
-	end
-end
-
-function addon:CHAT_MSG_ADDON(prefix, msg, chan, from)
-	if not prefix:match("Fiend") then return end
-
-	local guid, time = msg:split(";")
-	self.sync[guid] = true
-
-	if prefix == "FiendCombatStart" then
-		self.combatStart[guid] = tonumber(time)
-	elseif prefix == "FiendCombatStop" then
-		self.combatStop[guid] = tonumber(time)
-	elseif prefix == "FiendCombatSync" then
 	end
 end
 
