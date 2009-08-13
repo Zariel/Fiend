@@ -110,10 +110,7 @@ function Display:RemoveAllBars()
 end
 
 function Display:Resizing(width, height)
-	local total = math.floor(((height or fiend.frame:GetHeight() - 32) / self.size) + 0.5)
-
-	if total == self.total then return end
-	self.total = total
+	local total = math.floor((height or fiend.frame:GetHeight() - 32) / self.size)
 
 	local bar
 	for i = 1, #self.bars do
@@ -213,6 +210,7 @@ fiend.Display = setmetatable({}, { __call = function(self, title, size, bg)
 				bar:SetPoint("LEFT", 1, 0)
 				bar:SetPoint("RIGHT", - 1, 0)
 				bar:EnableMouse(true)
+				bar:Hide()
 
 				bar:SetScript("OnEnter", OnEnter)
 				bar:SetScript("OnLeave", function(self) tip:Hide(); self.parent.tip = false end)

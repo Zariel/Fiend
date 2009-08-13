@@ -90,7 +90,7 @@ function addon:ADDON_LOADED(name)
 
 	frame:SetScript("OnSizeChanged", function(self, width, height)
 		if addon.currentDisplay then
-			addon.currentDisplay:Resizing(width, height)
+			addon.currentDisplay.dirty = true
 		end
 	end)
 
@@ -123,6 +123,8 @@ function addon:ADDON_LOADED(name)
 
 			if addon.currentDisplay then
 				addon.currentDisplay:Resizing()
+				addon.currentDisplay.sizing = false
+				addon.currentDisplay.dirty = true
 			end
 		end
 	end)
@@ -130,6 +132,9 @@ function addon:ADDON_LOADED(name)
 	drag:SetScript("OnMouseDown", function(self, button)
 		if button == "LeftButton" and IsModifiedClick("ALT") then
 			frame:StartSizing()
+			if addon.currentDisplay then
+				addon.currentDisplay.sizing = true
+			end
 		end
 	end)
 
