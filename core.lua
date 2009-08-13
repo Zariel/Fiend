@@ -116,6 +116,7 @@ function addon:ADDON_LOADED(name)
 	drag:SetWidth(16)
 	drag:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", - 1, 1)
 	drag:EnableMouse(true)
+	drag:SetFrameLevel(20)
 
 	drag:SetScript("OnMouseUp", function(self, button)
 		if button == "LeftButton" then
@@ -132,6 +133,7 @@ function addon:ADDON_LOADED(name)
 	local texture = drag:CreateTexture(nil, "OVERLAY")
 	texture:SetTexture([[Interface\AddOns\Fiend\media\draghandle.tga]])
 	texture:SetBlendMode("ADD")
+	texture:SetAlpha(0.7)
 	texture:SetAllPoints(drag)
 
 	drag.texture = texture
@@ -147,6 +149,8 @@ function addon:ADDON_LOADED(name)
 
 	self.printNum = nil
 
+	self:CreateDropDown()
+
 	local damage = self.Display("Damage", 16, { 0.6, 0.2, 0.2 })
 	damage:Activate()
 
@@ -155,8 +159,6 @@ function addon:ADDON_LOADED(name)
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 	self:SetScript("OnUpdate", OnUpdate)
-
-	self:CreateDropDown()
 
 	ldb = LibStub("LibDataBroker-1.1", true)
 	if ldb then
@@ -210,16 +212,14 @@ function addon:CreateDropDown()
 	local drop = CreateFrame("Frame", "FiendDropDown", UIParent, "UIDropDownMenuTemplate")
 
 	-- </3
-	local menu = {
+	self.menu = {
 		{
 			{
 				text = "Fiend",
-				value = 0,
 				owner = drop,
 				isTitle = true,
 			}, {
 				text = "Reset",
-				value = 1,
 				owner = drop,
 				func = function()
 					if addon.currentDisplay then
@@ -227,8 +227,13 @@ function addon:CreateDropDown()
 					end
 				end,
 			}, {
+				text = "Windows",
+				owner = drop,
+				hasArrow = true,
+				menuList = {
+				},
+			}, {
 				text = "Output",
-				value = 2,
 				owner = drop,
 				hasArrow = true,
 				menuList = {
@@ -242,11 +247,19 @@ function addon:CreateDropDown()
 							end
 						end,
 					}, {
-						text = "Print",
+						text = "Party",
 						owner = drop,
 						func = function()
 							if addon.currentDisplay then
-								addon.currentDisplay:Output(addon.printNum)
+								addon.currentDisplay:Output(addon.printNum, "PARTY")
+							end
+						end,
+					}, {
+						text = "Say",
+						owner = drop,
+						func = function()
+							if addon.currentDisplay then
+								addon.currentDisplay:Output(addon.printNum, "SAY")
 							end
 						end
 					}, {
@@ -255,22 +268,30 @@ function addon:CreateDropDown()
 						func = function()
 						end,
 					}, {
+						text = "Print",
+						owner = drop,
+						func = function()
+							if addon.currentDisplay then
+								addon.currentDisplay:Output(addon.printNum)
+							end
+						end
+					}, {
 						text = "Count",
 						owner = drop,
 						hasArrow = true,
 						menuList = {
-						}
-					}
+						},
+					},
 				},
 			}
 		},
 	}
 
 	local count = 0
-	for i = 1, 26, 5 do
+	for i = 5, 26, 5 do
 		count = count + 1
 
-		menu[1][3].menuList[4].menuList[count] = {
+		self.menu[1][4].menuList[6].menuList[count] = {
 			text = i or "All",
 			value = count,
 			func = function()
@@ -280,7 +301,7 @@ function addon:CreateDropDown()
 		}
 	end
 
-	menu[1][3].menuList[4].menuList[count + 1] = {
+	self.menu[1][4].menuList[6].menuList[count + 1] = {
 		text = "All",
 		value = count + 1,
 		func = function()
@@ -290,8 +311,8 @@ function addon:CreateDropDown()
 	}
 
 	UIDropDownMenu_Initialize(drop, function(self, level, menuList)
-		if not (menuList or menu[level]) then return end
-		for k, v in ipairs(menuList or menu[level]) do
+		if not (menuList or addon.menu[level]) then return end
+		for k, v in ipairs(menuList or addon.menu[level]) do
 			v.value = k
 			UIDropDownMenu_AddButton(v, level)
 		end

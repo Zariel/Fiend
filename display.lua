@@ -127,13 +127,17 @@ function Display:Activate()
 	if self.isActive then return end
 
 	if fiend.currentDisplay then
-		fiend.currentDispay:Deactivate()
+		fiend.currentDisplay:Deactivate()
 	end
 
 	fiend.frame.title:SetText(self.title)
 	fiend.frame:SetBackdropBorderColor(unpack(self.bg))
 
 	fiend.currentDisplay = self
+
+	if fiend.dropDown:IsShown() then
+		UIDropDownMenu_Refresh(fiend.dropDown)
+	end
 
 	self.isActive = true
 	self.dirty = true
@@ -177,11 +181,12 @@ function Display:Output(count, where, player)
 
 	output(string.rep("=", width) .."Fiend " .. self.title, string.rep("=", width))
 
+	-- Need to do a double pass
 	local bar
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
 		bar = self.bars[i]
-		output(string.format("%d. %s [%d] \t(%d)", i, bar.name, bar.total, GetDPS(bar)))
+		output(string.format("%d. %s - %d (%d)", i, bar.name, bar.total, GetDPS(bar)))
 	end
 end
 
@@ -274,6 +279,22 @@ fiend.Display = setmetatable({}, { __call = function(self, title, size, bg)
 		end})
 
 		fiend.displays[title] = t
+	end
+
+	local drop = fiend.dropDown
+
+	local menu = {
+		text = title,
+		owner = drop,
+		func = function(self)
+			fiend.displays[title]:Activate()
+		end,
+	}
+
+	fiend.menu[1][3].menuList[#fiend.menu[1][3].menuList + 1] = menu
+
+	if fiend.dropDown:IsShown() then
+		UIDropDownMenu_Refresh(fiend.dropDown)
 	end
 
 	return fiend.displays[title]
