@@ -63,7 +63,9 @@ function addon:ADDON_LOADED(name)
 	frame:SetWidth(300)
 	frame:SetPoint("CENTER")
 	frame:EnableMouse(true)
+	frame:SetMinResize(50, 50)
 	frame:SetMovable(true)
+	frame:SetResizable(true)
 	frame:SetUserPlaced(true)
 	frame:SetClampedToScreen(true)
 	--frame:SetHitRectInsets(
@@ -86,6 +88,12 @@ function addon:ADDON_LOADED(name)
 		end
 	end)
 
+	frame:SetScript("OnSizeChanged", function(self, width, height)
+		if addon.currentDisplay then
+			addon.currentDisplay:Resizing(width, height)
+		end
+	end)
+
 	frame:SetBackdrop({
 		bgFile = [[Interface\Tooltips\UI-Tooltip-Background.tga]], tile = true, tileSize = 16,
 		edgeFile = [[Interface\AddOns\Fiend\media\otravi-semi-full-border.tga]], edgeSize = 32,
@@ -94,15 +102,46 @@ function addon:ADDON_LOADED(name)
 
 	frame:SetBackdropColor(0, 0, 0, 0.8)
 
-	self.frame = frame
-
 	local title = frame:CreateFontString(nil, "OVERLAY")
 	title:SetFont(STANDARD_TEXT_FONT, 16)
 	title:SetText("Fiend")
 	title:SetJustifyH("CENTER")
 	title:SetPoint("CENTER")
 	title:SetPoint("TOP", 0, - 12)
+
 	frame.title = title
+
+	local drag = CreateFrame("Frame", nil, frame)
+	drag:SetHeight(16)
+	drag:SetWidth(16)
+	drag:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", - 1, 1)
+	drag:EnableMouse(true)
+
+	drag:SetScript("OnMouseUp", function(self, button)
+		if button == "LeftButton" then
+			frame:StopMovingOrSizing()
+
+			if addon.currentDisplay then
+				addon.currentDisplay:Resizing()
+			end
+		end
+	end)
+
+	drag:SetScript("OnMouseDown", function(self, button)
+		if button == "LeftButton" and IsModifiedClick("ALT") then
+			frame:StartSizing()
+		end
+	end)
+
+	local texture = drag:CreateTexture(nil, "OVERLAY")
+	texture:SetTexture([[Interface\AddOns\Fiend\media\draghandle.tga]])
+	texture:SetBlendMode("ADD")
+	texture:SetAllPoints(drag)
+
+	drag.texture = texture
+	frame.drag = drag
+
+	self.frame = frame
 
 	self.displays = {}
 	self.displayCount = 0
@@ -198,12 +237,6 @@ function addon:CreateDropDown()
 				hasArrow = true,
 				menuList = {
 					{
-						text = "Count",
-						owner = drop,
-						hasArrow = true,
-						menuList = {
-						}
-					}, {
 						text = "Guild",
 						owner = drop,
 						func = function()
@@ -214,14 +247,24 @@ function addon:CreateDropDown()
 						end,
 					}, {
 						text = "Print",
-						value = 0,
 						owner = drop,
 						func = function()
 							if addon.currentDisplay then
 								addon.currentDisplay:Output(addon.printNum)
 							end
 						end
-					},
+					}, {
+						text = "Whisper",
+						owner = drop,
+						func = function()
+						end,
+					}, {
+						text = "Count",
+						owner = drop,
+						hasArrow = true,
+						menuList = {
+						}
+					}
 				},
 			}
 		},
@@ -231,7 +274,7 @@ function addon:CreateDropDown()
 	for i = 1, 26, 5 do
 		count = count + 1
 
-		menu[1][3].menuList[1].menuList[count] = {
+		menu[1][3].menuList[4].menuList[count] = {
 			text = i or "All",
 			value = count,
 			func = function()
@@ -241,7 +284,7 @@ function addon:CreateDropDown()
 		}
 	end
 
-	menu[1][3].menuList[1].menuList[count + 1] = {
+	menu[1][3].menuList[4].menuList[count + 1] = {
 		text = "All",
 		value = count + 1,
 		func = function()

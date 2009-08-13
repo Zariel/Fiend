@@ -109,8 +109,11 @@ function Display:RemoveAllBars()
 	self.total = 0
 end
 
-function Display:Resizing()
-	local total = math.floor((fiend.frame:GetHeight() - 32) / self.size)
+function Display:Resizing(width, height)
+	local total = math.floor(((height or fiend.frame:GetHeight() - 32) / self.size) + 0.5)
+
+	if total == self.total then return end
+	self.total = total
 
 	local bar
 	for i = 1, #self.bars do
@@ -171,7 +174,11 @@ function Display:Output(count, where, player)
 		end
 	end
 
-	output("Fiend " .. self.title)
+	-- I want a total width of 32 chars
+	local width = 32
+	width = (width - (string.len("Fiend " .. self.title))) / 2
+
+	output(string.rep("=", width) .."Fiend " .. self.title, string.rep("=", width))
 
 	local bar
 	for i = 1, count or #self.bars do
