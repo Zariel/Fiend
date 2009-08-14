@@ -16,7 +16,7 @@ local tip = GameTooltip
 local OnEnter = function(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
-		tip:AddDoubleLine(self.pos .. ". " .. self.name, GetDPS(self) .. " dps", self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
+		tip:AddDoubleLine(self.pos .. ". " .. self.name, GetDPS(self) .. " " .. self.parent.suffix, self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
 		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
 
 		tip:Show()
@@ -191,7 +191,7 @@ function Display:Output(count, where, player)
 	end
 end
 
-fiend.Display = setmetatable({}, { __call = function(self, title, size, bg)
+fiend.Display = setmetatable({}, { __call = function(self, title, size, bg, suffix)
 	if not fiend.displays[title] then
 		local t = setmetatable({}, { __index = Display } )
 
@@ -204,6 +204,7 @@ fiend.Display = setmetatable({}, { __call = function(self, title, size, bg)
 		t.title = title
 		t.total = 0
 		t.bg = bg or { 0.3, 0.3, 0.3 }
+		t.suffix = suffix
 
 		t.guids = setmetatable({}, { __index = function(self, guid)
 			local bar

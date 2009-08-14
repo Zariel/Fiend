@@ -151,11 +151,11 @@ function addon:ADDON_LOADED(name)
 
 	self:CreateDropDown()
 
-	local damage = self.Display("Damage", 16, { 0.6, 0.2, 0.2 })
+	local damage = self.Display("Damage", 16, { 0.6, 0.2, 0.2 }, "dps")
 	damage:Activate()
 
-	self.Display("Healing", 16, { 0.2, 0.6, 0.2 })
-	self.Display("OverHealing", 16, { 0.2, 0.6, 0.5 })
+	self.Display("Healing", 16, { 0.2, 0.6, 0.2 }, "hps")
+	self.Display("OverHealing", 16, { 0.2, 0.6, 0.5 }, "hps")
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
