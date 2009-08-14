@@ -155,6 +155,7 @@ function addon:ADDON_LOADED(name)
 	damage:Activate()
 
 	self.Display("Healing", 16, { 0.2, 0.6, 0.2 })
+	self.Display("OverHealing", 16, { 0.2, 0.6, 0.5 })
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
@@ -194,10 +195,14 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 
 	local damage = ammount - (over + resist)
 
+	if (event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 and self.displays.OverHealing then
+		self.displays.OverHealing:Update(sourceGUID, over)
+	end
+
 	if damage > 0 then
 		local display = self.displays[events[event]]
-		if display then
 
+		if display then
 			local pet = self:IsPet(sourceGUID)
 			if pet then
 				sourceGUID = pet
