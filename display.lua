@@ -140,7 +140,8 @@ function Display:Activate()
 	end
 
 	self.isActive = true
-	self.dirty = true
+	-- Update faster
+	self:UpdateDisplay()
 end
 
 function Display:Deactivate(clean)
