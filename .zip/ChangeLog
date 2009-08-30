@@ -1,0 +1,443 @@
+commit 1750c8afe3cdc180f489ffdf4cb71f8ef5ad9f7d
+Author: Zariel
+Date:   Fri Aug 14 17:31:44 2009 +0100
+
+    Set the suffix for dps/hps
+
+commit c938eb046f54bb33cca2bebeb4cbec37614dd17f
+Author: Zariel
+Date:   Fri Aug 14 17:26:23 2009 +0100
+
+    Update faster when we change
+
+commit 7eabef4914f488e2aae3a0b585f18b08ac23bbea
+Author: Zariel
+Date:   Fri Aug 14 17:26:06 2009 +0100
+
+    Add overhealing
+
+commit 23d43c1810f89958ed59102e2962869c36293f9b
+Author: Zariel
+Date:   Thu Aug 13 22:33:24 2009 +0100
+
+    Fix drop down
+
+commit fea1599eb782b5d65b0fc504ff94c3ede4a86bd9
+Author: Zariel
+Date:   Thu Aug 13 16:37:29 2009 +0100
+
+    Clean up
+
+commit 79b41e38bc56186bf0c419211312ae87f766f914
+Author: Zariel
+Date:   Thu Aug 13 16:36:59 2009 +0100
+
+    Cleaner sizing
+
+commit 98b8f127e1a0364a09f93185837201200f4ceba8
+Author: Zariel
+Date:   Thu Aug 13 16:07:41 2009 +0100
+
+    Sizinglol
+
+commit 7764c66437a95c83eeff4f0283c147c01510b3ed
+Author: Zariel
+Date:   Thu Aug 13 15:26:47 2009 +0100
+
+    So you can use the cursor as an anchor
+
+commit 9795b48b9fb50cc0d95079558fddd2b1c8b8dcd0
+Author: Zariel
+Date:   Thu Aug 13 14:55:35 2009 +0100
+
+    Do some stuff, also hide the Display table from everyone
+
+commit e33b116189f48d4a78c342a74cfe38b4c5e7f913
+Author: Zariel
+Date:   Mon Jul 20 17:29:12 2009 +0100
+
+    reset combat time when we reset bars, add upvalues, simples event -> Display
+
+commit 44d4324d4735189915fe69556b0ccb968f9dc792
+Author: Zariel
+Date:   Sun Jul 19 21:54:12 2009 +0100
+
+    DPS Tracking phase 2
+
+commit aef06bb8af7e1b8430e01bd43e1292a1c330a2bb
+Author: Zariel
+Date:   Sun Jul 19 17:38:11 2009 +0100
+
+    Add iterator
+
+commit 513b306212dcde4deebe44ea8e46139bcc0f0b38
+Author: Zariel
+Date:   Sun Jul 19 16:47:33 2009 +0100
+
+    Stupid dropdown is stupid
+
+commit dde3f36b55bfc478ba2e5518041851db1d3fc85b
+Author: Zariel
+Date:   Sun Jul 19 16:23:57 2009 +0100
+
+    Clean up the bar when it gets pooled
+
+commit 179b7aaccdfb161da80836545ba9fa91eb712fcb
+Author: Zariel
+Date:   Sun Jul 19 16:23:48 2009 +0100
+
+    Anchor the dropdown
+
+commit f5ff4c7ad11ca774cc4c13b775cce3ec691ffa4c
+Author: Zariel
+Date:   Sun Jul 19 16:17:56 2009 +0100
+
+    Maintain player guid as player unit
+
+commit 4f72d88dc14254d4f142bf4d13b3d6639107ea9c
+Author: Zariel
+Date:   Sun Jul 19 15:01:56 2009 +0100
+
+    Properly deactivate, set the percentage on the bars
+
+commit 070e3d5035a695101ef0f7e10e1d00e1aa4f348f
+Author: Zariel
+Date:   Sun Jul 19 14:00:40 2009 +0100
+
+    Correctly return the owners unit for pets
+
+commit 6272c16c9f672e6420d4c38f621ae0e4164c9511
+Author: Zariel
+Date:   Sun Jul 19 13:45:30 2009 +0100
+
+    Register actual events
+
+commit c6f0983e6964d60dd411dced0680a4c67e53f5f7
+Author: Zariel
+Date:   Sun Jul 19 13:40:23 2009 +0100
+
+    Concat HOOO
+
+commit 4f3fcb4920b9e13932f84554bf29133593459226
+Author: Zariel
+Date:   Sun Jul 19 13:34:52 2009 +0100
+
+    Make sure table index isnt nil
+
+commit 480d09a58a5570cbcae7caba10ce31adc4c37026
+Author: Zariel
+Date:   Sun Jul 19 13:25:40 2009 +0100
+
+    Bail early if we dont have guid mapping
+
+commit b64ff936fcf08d34f4bc5ed3c2b99bd02c660444
+Author: Zariel
+Date:   Sun Jul 19 13:02:17 2009 +0100
+
+    Noclamenture
+
+commit ebfda7ba11be84490e012a895d7a204a8c4af84d
+Author: Zariel
+Date:   Sun Jul 19 12:53:10 2009 +0100
+
+    Remove the the pets from the units too
+
+commit da67729bb529b3dc21c50d6d6781bcb4df2e995d
+Author: Zariel
+Date:   Sun Jul 19 12:51:47 2009 +0100
+
+    More typos, what was I thinking last night?
+
+commit 34ab3168ca2bfcf63a58389a17521f183a77210d
+Author: Zariel
+Date:   Sun Jul 19 12:48:40 2009 +0100
+
+    Store the pet in the units too
+
+commit ca1fa481c171e00f4ace651c8a89225d89a32846
+Author: Zariel
+Date:   Sun Jul 19 12:42:41 2009 +0100
+
+    C STACK OVERFLOW NOOO
+
+commit 4d67480a0663e1ccc95899f599f2d6eb5be89426
+Author: Zariel
+Date:   Sun Jul 19 12:25:17 2009 +0100
+
+    More coffee please
+
+commit 29ca7b54aeb2bf776808c2b63f134b202850e09d
+Author: Zariel
+Date:   Sun Jul 19 12:23:45 2009 +0100
+
+    Get the playerGUID during login
+
+commit ea3a117a4ccf2b8a79c6e3a461b361bd190652a7
+Author: Zariel
+Date:   Sun Jul 19 12:23:33 2009 +0100
+
+    Remove unused functions from core
+
+commit b917c6b0e55f71663ca75accf00796b2f31cb504
+Author: Zariel
+Date:   Sun Jul 19 02:47:44 2009 +0100
+
+    Ichigo no
+
+commit 5f07ea0c400e8c94996cab2294094b7f5ab49bb3
+Author: Zariel
+Date:   Sun Jul 19 02:47:15 2009 +0100
+
+    Drycoding when too tired is not a good idea
+
+commit 0bf04a3393acda34663fce44f09cd51aa9a21a59
+Author: Zariel
+Date:   Sun Jul 19 02:46:35 2009 +0100
+
+    Helps to load the file
+
+commit bda468992e744d6795e0198cec50d4e05756d036
+Author: Zariel
+Date:   Sun Jul 19 02:44:10 2009 +0100
+
+    Remove unusde functions
+
+commit 9dfdcf50d8dd4f9bbe905009b8a78e57775cc8bd
+Author: Zariel
+Date:   Sun Jul 19 02:42:52 2009 +0100
+
+    typo
+
+commit 32b99c8aa492d587c1cecf7432720f8651bcacee
+Author: Zariel
+Date:   Sun Jul 19 02:38:59 2009 +0100
+
+    Dont trust sed that much
+
+commit 7f1ae20cee0972bb81c0c436cdb0428292bb5e09
+Author: Zariel
+Date:   Sun Jul 19 02:38:45 2009 +0100
+
+    Add the ability to add pets
+
+commit c094c94a31c70aeffb92fd2365764256e7bf1ff6
+Author: Zariel
+Date:   Sun Jul 19 02:34:00 2009 +0100
+
+    Dry change over to guids, sed ftw ..
+
+commit ecf754063aa6003d30614c40b5502ade0cdd8400
+Author: Zariel
+Date:   Sun Jul 19 02:33:44 2009 +0100
+
+    Remove old roster, parse the guid isntead using new functions
+
+commit 4c7bf09ee88039b326098347969df9745c616bfd
+Author: Zariel
+Date:   Sun Jul 19 02:28:41 2009 +0100
+
+    Add a func
+
+commit 464f5902d1e483b895e27f61e5cb7d6b546a165e
+Author: Zariel
+Date:   Sun Jul 19 02:28:01 2009 +0100
+
+    Flesh out a roster system
+
+commit 498782a4012245fa5138bf009e7addc79b6e1c6a
+Author: Zariel
+Date:   Sun Jul 19 01:01:14 2009 +0100
+
+    You are ravaged by a roster ..
+
+commit e228e96eedbaa8b64886fb8a57459e663edbc337
+Author: Zariel
+Date:   Sun Jul 19 01:00:21 2009 +0100
+
+    Add locals, adjust the dropDown
+
+commit d242fd65bc85edcf34183d6e37257f5a1b604262
+Author: Zariel
+Date:   Sat Jul 18 18:49:36 2009 +0100
+
+    Set the title color on display init, remove unused functions
+
+commit 565f221f76bda599b1c0dd15f2b6366e6ecbf1de
+Author: Zariel
+Date:   Sat Jul 18 14:03:07 2009 +0100
+
+    Merge totems/summoned pets with masters damage
+
+commit 35fb7351acef5d88df2e4ac4bab0b6edeeca0fa9
+Author: Zariel
+Date:   Sat Jul 18 13:44:06 2009 +0100
+
+    Remove the slider for now
+
+commit d53d5d8ae7f3cb24383a2d1bb2a14e1dcc1d3769
+Author: Zariel
+Date:   Sat Jul 18 01:56:02 2009 +0100
+
+    Add the ability to change how many are outputted without using slider
+
+commit 3a8b8d6fc06aacdaff99284a4ce88ea68455241b
+Author: Zariel
+Date:   Sat Jul 18 01:55:10 2009 +0100
+
+    Fix referance
+
+commit 8c58d1f28982fa908f65a0092694c63030a67e3e
+Author: Zariel
+Date:   Sat Jul 18 01:25:08 2009 +0100
+
+    Reset the right
+
+commit 66f458876eac0b3467a0d2c592755a61071cc043
+Author: Zariel
+Date:   Sat Jul 18 01:24:35 2009 +0100
+
+    Fix bars not updating the name when getting them from the pool
+
+commit f2eb96f4536e008e3cfb9a653e6d7b61be5712f6
+Author: Zariel
+Date:   Sat Jul 18 00:17:46 2009 +0100
+
+    Make the bars width proportional to the total damage done instead of the maximum of one player
+
+commit b31c1e8226a78ace400f6f273f3c383115a8a1e1
+Author: Zariel
+Date:   Sat Jul 18 00:07:15 2009 +0100
+
+    Ignore vehicle damage
+
+commit c958b13d2130fff03ebb99c90656843df43013e0
+Author: Zariel
+Date:   Sat Jul 18 00:03:25 2009 +0100
+
+    Merge pets with owners damage
+
+commit 46578e34e8b33316e45a1d06127a14613f6753c4
+Author: Zariel
+Date:   Fri Jul 17 17:01:42 2009 +0100
+
+    Tweak pos
+
+commit 8ded1b9f8f8ab9342f12034c0ec0c17b1352f66c
+Author: Zariel
+Date:   Fri Jul 17 16:44:58 2009 +0100
+
+    Indent the text
+
+commit 8844a68ee228ea38ce4cc8b2cdafda1a99b14f30
+Author: Zariel
+Date:   Fri Jul 17 16:41:02 2009 +0100
+
+    Add bar pooling
+
+commit c8b7c5b78eb96f9c9a7500d60cf0f373dbc5a628
+Author: Zariel
+Date:   Fri Jul 17 16:16:21 2009 +0100
+
+    Remove dropDown file
+
+commit c1dbc577996e770072cc90c51dbc4ab5901f0469
+Author: Zariel
+Date:   Fri Jul 17 16:13:53 2009 +0100
+
+    Add tooltip and start of dropDown menu
+
+commit 1690c664b56027d5a58d4b5cfe83c3557e99ec31
+Author: Zariel
+Date:   Fri Jul 17 14:15:27 2009 +0100
+
+    Remove bars
+
+commit 53e8ec5b47fb5cde442d159bae553ab17ab8d03f
+Author: Zariel
+Date:   Fri Jul 17 13:42:27 2009 +0100
+
+    Update every 0.5s, add output, add resetall, fix deactivate to just hide bars, dont loop over displays
+
+commit a42d8a7eec52b37f54f58ba9ac4b6762a76cad31
+Author: Zariel
+Date:   Fri Jul 17 02:34:55 2009 +0100
+
+    Add shadows, fix typo
+
+commit b9ee0a23a28869c40ab7e3c5b9ca91284a0cd863
+Author: Zariel
+Date:   Fri Jul 17 01:52:48 2009 +0100
+
+    Aparently the game was broken ...
+
+commit dc9ccfa1c69b37b08ded7d189ee55f05d0197c9f
+Author: Zariel
+Date:   Fri Jul 17 01:16:18 2009 +0100
+
+    Try to fix ..
+
+commit 91f6c9bdd586506055bfe206632949ff0f92d0e1
+Author: Zariel
+Date:   Fri Jul 17 00:57:11 2009 +0100
+
+    Typo
+
+commit 56deb375d6b1bfde663bfa3069c054424a251dc9
+Author: Zariel
+Date:   Fri Jul 17 00:52:28 2009 +0100
+
+    Tweak shadows
+
+commit 9d877df4dbf4c2e85a4077b2e6b1e20e89b2d604
+Author: Zariel
+Date:   Fri Jul 17 00:51:20 2009 +0100
+
+    Fix positioning, add shadows
+
+commit 3dee588bbb091f3bee9b949732a30e7f3d45bd5f
+Author: Zariel
+Date:   Fri Jul 17 00:50:56 2009 +0100
+
+    Dont init the OnUpdate straight away, check that the display exists
+
+commit e8a8ae9a86c727dcbc4c8d17a0541fe870179288
+Author: Zariel
+Date:   Fri Jul 17 00:31:51 2009 +0100
+
+    Update size logic
+
+commit 03e3032c23123cabdfb8c6087ecb6f247c8b8c08
+Author: Zariel
+Date:   Fri Jul 17 00:30:47 2009 +0100
+
+    Update the bar offset
+
+commit 278fa393dab7460eef2f71db1c1592faaffb40f1
+Author: Zariel
+Date:   Fri Jul 17 00:29:56 2009 +0100
+
+    Otravi Otravi\!
+
+commit f8de686f574fb8e25ba26183f6328c96d0da2b1b
+Author: Zariel
+Date:   Fri Jul 17 00:13:56 2009 +0100
+
+    Set the width correctly
+
+commit 40f31164447ff6fcc287f54657d12ed8b4faf956
+Author: Zariel
+Date:   Fri Jul 17 00:08:56 2009 +0100
+
+    Use status bars, fix positioning, fix checking that the display is enabled
+
+commit 9c511286cb04782a2765313b94824872d10bbec6
+Author: Zariel
+Date:   Thu Jul 16 19:18:12 2009 +0100
+
+    license
+
+commit 403d9b2478ef58856fa51b3df630ad87a19baa3f
+Author: Zariel
+Date:   Thu Jul 16 19:17:39 2009 +0100
+
+    Simple Damage Meter

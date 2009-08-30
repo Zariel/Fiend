@@ -56,7 +56,7 @@ function Display:Update(guid, ammount)
 end
 
 function Display:UpdateDisplay()
-	if not self.isActive or #self.bars == 0 then return end
+	if not self.isActive or #self.bars == 0 or not fiend.frame:IsShown() then return end
 
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
 
@@ -251,6 +251,16 @@ fiend.Display = setmetatable({}, { __call = function(self, title, size, bg, suff
 			end
 
 			local unit = fiend:GetUnit(guid)
+			if not unit then
+				if UnitInRaid("player") then
+					fiend:RAID_ROSTER_UPDATE()
+				else
+					fiend:PARTY_MEMBERS_UPDATE()
+				end
+
+				unit = fiend:GetUnit(guid)
+			end
+
 			local class = select(2, UnitClass(unit)) or "WARRIOR"
 			local col = RAID_CLASS_COLORS[class]
 			local name = UnitName(unit)

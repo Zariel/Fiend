@@ -1,4 +1,5 @@
-## Interface: 310000
+## Interface: 302000
+## OptionalDeps: LibDataBroker-1.1
 
 core.lua
 roster.lua

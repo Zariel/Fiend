@@ -20,8 +20,12 @@ local OnUpdate = function(self, elapsed)
 		-- Dont throttle this ?
 		for unit, guid in self:IterateUnitRoster() do
 			if UnitAffectingCombat(unit) then
+				if not self.inCombat[guid] then
+					self.combatTime[guid] = 0
+				end
+
 				self.inCombat[guid] = true
-				self.combatTime[guid] = (self.combatTime[guid] or 0) + timer
+				self.combatTime[guid] = self.combatTime[guid] + timer
 			elseif self.inCombat[guid] then
 				self.inCombat[guid] = false
 			end
@@ -163,6 +167,23 @@ function addon:ADDON_LOADED(name)
 
 	ldb = LibStub("LibDataBroker-1.1", true)
 	if ldb then
+		local obj = ldb:NewDataObject("Fiend", {
+			type = "launcher",
+			icon = [[Interface\Icons\Ability_BullRush]],
+			OnClick = function(self, button)
+				if button == "RightButton" then
+					ToggleDropDownMenu(1, nil, addon.dropDown, "cursor")
+				else
+					if addon.frame:IsShown() then
+						addon.frame:Hide()
+					else
+						addon.frame:Show()
+					end
+				end
+			end,
+		})
+
+		self.dataObj = obj
 	end
 
 	self.ADDON_LOADED = nil
