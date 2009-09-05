@@ -20,14 +20,7 @@ local OnUpdate = function(self, elapsed)
 		-- Dont throttle this ?
 		for unit, guid in self:IterateUnitRoster() do
 			if UnitAffectingCombat(unit) then
-				if not self.inCombat[guid] then
-					self.combatTime[guid] = 0
-				end
-
-				self.inCombat[guid] = true
-				self.combatTime[guid] = self.combatTime[guid] + timer
-			elseif self.inCombat[guid] then
-				self.inCombat[guid] = false
+				self.combatTime[guid] = (self.combatTime[guid] or 0) + timer
 			end
 		end
 
@@ -191,11 +184,7 @@ end
 
 local spellId, spellName, spellSchool, ammount, over, school, resist
 function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
-	if not events[event] then return end
-
-	if band(sourceFlags, filter) == 0 then
-		return
-	end
+	if not events[event] or not band(sourceFlags, filter) then return end
 
 	if event == "SWING_DAMAGE" then
 		ammount, over, school, resist = ...
@@ -214,6 +203,7 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	resist = resist or 0
 	over = over or 0
 
+	-- Track over kill ?
 	local damage = ammount - (over + resist)
 
 	if (event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 and self.displays.OverHealing then
@@ -309,6 +299,12 @@ function addon:CreateDropDown()
 						},
 					},
 				},
+			}, {
+				text = "hide",
+				owner = drop,
+				func = function()
+					addon.frame:Hide()
+				end,
 			}
 		},
 	}

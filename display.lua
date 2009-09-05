@@ -100,7 +100,6 @@ function Display:RemoveAllBars()
 
 		self.guids[bar.guid] = nil
 
-		fiend.inCombat[bar.guid] = nil
 		fiend.combatTime[bar.guid] = 0
 
 		table.insert(pool, bar)
@@ -180,14 +179,14 @@ function Display:Output(count, where, player)
 	local width = 32
 	width = (width - (string.len("Fiend " .. self.title))) / 2
 
-	output(string.rep("=", width) .."Fiend " .. self.title, string.rep("=", width))
+	output(string.rep("=", width) .."Fiend " .. self.title .. string.rep("=", width))
 
 	-- Need to do a double pass
 	local bar
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
 		bar = self.bars[i]
-		output(string.format("%d. %s - %d (%d)", i, bar.name, bar.total, GetDPS(bar)))
+		output(string.format("%d. %s - %d (%d%s) - %d%%", i, bar.name, bar.total, GetDPS(bar), self.suffix, (math.floor(bar.total * 10000 / self.total) / 100)))
 	end
 end
 
@@ -259,6 +258,7 @@ fiend.Display = setmetatable({}, { __call = function(self, title, size, bg, suff
 				end
 
 				unit = fiend:GetUnit(guid)
+				-- PRAY WITH ME
 			end
 
 			local class = select(2, UnitClass(unit)) or "WARRIOR"
