@@ -32,8 +32,6 @@ local OnUpdate = function(self, elapsed)
 	end
 end
 
-addon:Show()
-
 local ldb
 local band = bit.band
 local filter = COMBATLOG_OBJECT_AFFILIATION_RAID + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_MINE
@@ -144,7 +142,7 @@ function addon:ADDON_LOADED(name)
 	self.combatTime = {}
 	self.inCombat = {}
 
-	self.printNum = nil
+	self.printNum = 10
 
 	self:CreateDropDown()
 
@@ -157,6 +155,7 @@ function addon:ADDON_LOADED(name)
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 	self:SetScript("OnUpdate", OnUpdate)
+	self:Show()
 
 	ldb = LibStub("LibDataBroker-1.1", true)
 	if ldb then
@@ -215,11 +214,13 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 
 		if display then
 			local pet = self:IsPet(sourceGUID)
+
 			if pet then
 				sourceGUID = pet
+				sourceName = UnitName(self:GetUnit(pet))
 			end
 
-			display:Update(sourceGUID, damage)
+			display:Update(sourceGUID, damage, sourceName)
 		end
 	end
 end

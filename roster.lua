@@ -35,7 +35,7 @@ local Clean = function(base, num)
 end
 
 local UpdateRoster = function(base, num)
-	local unit, pet, guid, pguid
+	local unit, guid
 
 	for i = 1, num do
 		unit = base .. i
@@ -47,8 +47,6 @@ local UpdateRoster = function(base, num)
 				unit = "player"
 			end
 
-			pet = unit .. "pet"
-
 			units[unit] = guid
 			guids[guid] = unit
 
@@ -56,6 +54,7 @@ local UpdateRoster = function(base, num)
 		elseif units[unit] then
 			guids[units[unit]] = nil
 			units[unit] = nil
+			fiend:UNIT_PET(unit)
 		end
 	end
 end
@@ -68,7 +67,7 @@ function fiend:RAID_ROSTER_UPDATE()
 	UpdateRoster("raid", 40)
 end
 
-function fiend:PARTY_MEMBERS_CHANGED()
+function fiend:PARTY_MEMBERS_CHANGED(...)
 	if not UnitExists("party1") then
 		return Clean("party", 4)
 	end
@@ -110,9 +109,12 @@ function fiend:UNIT_PET(unit)
 end
 
 fiend:RegisterEvent("RAID_ROSTER_UPDATE")
-fiend:RegisterEvent("PARTY_MEMBERS_UPDATE")
+fiend:RegisterEvent("PARTY_MEMBERS_CHANGED")
 fiend:RegisterEvent("PLAYER_ENTERING_WORLD")
 fiend:RegisterEvent("UNIT_PET")
+fiend:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+
+fiend.ZONE_CHANGED_NEW_AREA = fiend.PARTY_MEMBERS_CHANGED
 
 function fiend:IsPet(guid)
 	return pets[guid]
@@ -130,3 +132,4 @@ end
 function fiend:IterateUnitRoster()
 	return next, units, nil
 end
+

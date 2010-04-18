@@ -42,8 +42,9 @@ local pool = setmetatable({}, {
 
 local Display = {}
 
-function Display:Update(guid, ammount)
+function Display:Update(guid, ammount, name)
 	local bar = self.guids[guid]
+	bar.name = name
 
 	bar.total = bar.total + ammount
 	self.total = self.total + ammount
@@ -254,16 +255,16 @@ fiend.Display = setmetatable({}, { __call = function(self, title, size, bg, suff
 				if UnitInRaid("player") then
 					fiend:RAID_ROSTER_UPDATE()
 				else
-					fiend:PARTY_MEMBERS_UPDATE()
+					fiend:PARTY_MEMBERS_CHANGED()
 				end
 
 				unit = fiend:GetUnit(guid)
 				-- PRAY WITH ME
 			end
 
-			local class = select(2, UnitClass(unit)) or "WARRIOR"
+			local class = select(2, GetPlayerInfoByGUID(guid)) or "WARRIOR"
 			local col = RAID_CLASS_COLORS[class]
-			local name = UnitName(unit)
+			--local name = UnitName(unit)
 
 			bar:SetHeight(size)
 			bar:SetStatusBarColor(col.r, col.g, col.b)
@@ -278,7 +279,7 @@ fiend.Display = setmetatable({}, { __call = function(self, title, size, bg, suff
 			bar.pos = 0
 			bar.class = class
 			bar.col = col
-			bar.name = name
+			--bar.name = name
 
 			fiend.combatTime[guid] = 0
 
