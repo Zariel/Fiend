@@ -13,19 +13,8 @@ local OnUpdate = function(self, elapsed)
 	timer = timer + elapsed
 
 	if timer > 0.5 then
-		if self.currentDisplay and self.currentDisplay.dirty then
-			self.currentDisplay:UpdateDisplay()
-		end
-
-		-- Dont throttle this ?
-		for unit, guid in self:IterateUnitRoster() do
-			if UnitAffectingCombat(unit) then
-				self.combatTime[guid] = (self.combatTime[guid] or 0) + timer
-			end
-		end
-
-		if self.currentDisplay and self.currentDisplay.tip then
-			self.OnEnter(GameTooltip:GetOwner())
+		for i, d in pairs(self.displays) do
+			d:OnUpdate(timer)
 		end
 
 		timer = 0
@@ -62,7 +51,7 @@ function addon:ADDON_LOADED(name)
 
 	self:CreateDropDown()
 
-        local win = self:NewDisplay(title)
+        local win = self:NewDisplay("main")
         local damage = win:NewView("Damage", {
 		"SWING_DAMAGE",
 		"RANGE_DAMAGE",
@@ -78,7 +67,6 @@ function addon:ADDON_LOADED(name)
 ]]
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
-	self:SetScript("OnUpdate", OnUpdate)
 	self:Show()
 
 	ldb = LibStub("LibDataBroker-1.1", true)
@@ -101,6 +89,8 @@ function addon:ADDON_LOADED(name)
 
 		self.dataObj = obj
 	end
+
+	self:SetScript("OnUpdate", OnUpdate)
 
 	self.ADDON_LOADED = nil
 end
