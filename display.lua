@@ -4,7 +4,7 @@ local Display = {
 }
 
 local View = {
-	texture = [[Interface\fiends\Fiend\media\HalV.tga]],
+	texture = [[Interface\addons\Fiend\media\HalV.tga]],
 	max = 0,
 	isActive = false,
 	total = 0,
@@ -14,10 +14,10 @@ local View = {
 local floor = math.floor
 
 local tip = GameTooltip
-function display.OnEnter = function(self)
+function Display.OnEnter(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
-		tip:AddDoubleLine(self.pos .. ". " .. self.name, self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
+		tip:AddDoubleLine(self.pos .. ". " .. self.name, "lal", self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
 		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
 
 		tip:Show()
@@ -59,7 +59,7 @@ function View:UpdateDisplay()
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
 
 	local total = math.floor((self.display.frame:GetHeight() - 32) / self.size)
-	local width = fiend.frame:GetWidth()
+	local width = self.display.frame:GetWidth()
 
 	local size = self.size
 
@@ -75,7 +75,7 @@ function View:UpdateDisplay()
 			bar:SetValue(100 * (bar.total / max))
 
 			if bar.pos ~= i then
-				bar:SetPoint("TOP", fiend.frame, "TOP", 0, ((i - 1) * -size) - 32)
+				bar:SetPoint("TOP", self.display.frame, "TOP", 0, ((i - 1) * -size) - 32)
 
 				bar.left:SetText(i .. ". " .. bar.name)
 
@@ -122,7 +122,7 @@ function View:Activate()
 	if self.isActive then return end
 
 	if self.display.currentDisplay then
-		fiend.currentDisplay:Deactivate()
+		self.display.currentDisplay:Deactivate()
 	end
 
 	self.display.frame.title:SetText(self.title)
@@ -188,6 +188,12 @@ function View:Output(count, where, player)
 	end
 end
 
+function Display:OnUpdate(elapsed)
+	if self.currentDisplay then
+		self.currentDisplay:UpdateDisplay()
+	end
+end
+
 function Display:CreateFrame(title)
 	local frame = CreateFrame("Frame", "FiendDamage" .. title, UIParent)
 	frame:SetHeight(250)
@@ -214,20 +220,20 @@ function Display:CreateFrame(title)
 			if IsModifiedClick("SHIFT") then
 				self.currentDisplay:RemoveAllBars()
 			else
-				--ToggleDropDownMenu(1, nil, fiend.dropDown, "cursor")
+				ToggleDropDownMenu(1, nil, self.dropDown, "cursor")
 			end
 		end
 	end)
 
 	frame:SetScript("OnSizeChanged", function(s, width, height)
-		if self.display.currentDisplay then
-			self.display.currentDisplay.dirty = true
+		if self.currentDisplay then
+			self.currentDisplay.dirty = true
 		end
 	end)
 
 	frame:SetBackdrop({
 		bgFile = [[Interface\Tooltips\UI-Tooltip-Background.tga]], tile = true, tileSize = 16,
-		edgeFile = [[Interface\fiends\Fiend\media\otravi-semi-full-border.tga]], edgeSize = 32,
+		edgeFile = [[Interface\addons\Fiend\media\otravi-semi-full-border.tga]], edgeSize = 32,
 		insets = {left = 0, right = 0, top = 20, bottom = 0},
 	})
 
@@ -262,7 +268,7 @@ function Display:CreateFrame(title)
 	end)
 
 	local texture = drag:CreateTexture(nil, "OVERLAY")
-	texture:SetTexture([[Interface\fiends\Fiend\media\draghandle.tga]])
+	texture:SetTexture([[Interface\addons\Fiend\media\draghandle.tga]])
 	texture:SetBlendMode("ADD")
 	texture:SetAlpha(0.7)
 	texture:SetAllPoints(drag)
@@ -280,7 +286,9 @@ function fiend:NewDisplay(title)
 	local t = setmetatable({}, { __index = Display } )
 
 	t.views = {}
+	t.menu = {}
 	t:CreateFrame(title)
+	t:ToolTip()
 
 	self.displays[title] = t
 
@@ -288,12 +296,16 @@ function fiend:NewDisplay(title)
 end
 
 function Display:CombatEvent(event, guid, ammount, name, overHeal)
-	if not self.events[event] then return end -- Dont care
+	if not self.events[event] then
+		return
+	end
 
-	if overHeal and self.overHeal then
-		self:Update(guid, overHeal, name)
-	else if ammount > 0 then
-		self:Update(guid, ammount, name)
+	for i, d in pairs(self.events[event]) do
+		if overHeal and self.overHeal then
+			d:Update(guid, overHeal, name)
+		elseif ammount > 0 then
+			d:Update(guid, ammount, name)
+		end
 	end
 end
 
@@ -302,11 +314,12 @@ function Display:NewView(title, events, size, bg, color)
 
 	local t = setmetatable({}, { __index = View })
 
-	t.events = {}
+	self.events = {}
 	t.bars = {}
 
 	for i, event in pairs(events) do
-		t.events[event] = true
+		self.events[event] = self.events[event] or {}
+		table.insert(self.events[event], t)
 	end
 
 	t.size = size
@@ -314,8 +327,9 @@ function Display:NewView(title, events, size, bg, color)
 	t.bg = bg or self.bg
 	t.color = color
 	t.display = self
+	t.total = 0
 
-	t.guids = setmetatable({}, { __index = function(, guid)
+	t.guids = setmetatable({}, { __index = function(s, guid)
 		local bar
 		if next(pool) then
 			bar = table.remove(pool, 1)
@@ -378,8 +392,9 @@ function Display:NewView(title, events, size, bg, color)
 		bar.parent = t
 		bar.total = 0
 		bar.pos = 0
+		bar.col = col
 
-		table.insert(self.bars, bar)
+		table.insert(t.bars, bar)
 		rawset(s, guid, bar)
 
 		bar:Hide()
@@ -387,25 +402,148 @@ function Display:NewView(title, events, size, bg, color)
 		return bar
 	end})
 
-	--[[
-	local drop = fiend.dropDown
+	local drop = self.dropDown
 
 	local menu = {
 		text = name,
 		owner = drop,
 		func = function(self)
-			self.displays[title]:Activate()
+			t:Activate()
 		end,
 	}
 
-	fiend.menu[1][3].menuList[#fiend.menu[1][3].menuList + 1] = menu
+	self.menu[1][3].menuList[#self.menu[1][3].menuList + 1] = menu
 
-	if fiend.dropDown:IsShown() then
-		UIDropDownMenu_Refresh(fiend.dropDown)
+	if self.dropDown:IsShown() then
+		UIDropDownMenu_Refresh(self.dropDown)
 	end
-	]]
 
 	self.views[title] = t
 
+	if #self.views == 1 then
+		self:Activate()
+	end
+
 	return t
+end
+
+function Display:ToolTip()
+	local drop = CreateFrame("Frame", "FiendDropDown", UIParent, "UIDropDownMenuTemplate")
+
+	-- </3
+	self.menu = {
+		{
+			{
+				text = "Fiend - ",
+				owner = drop,
+				isTitle = true,
+			}, {
+				text = "Reset",
+				owner = drop,
+				func = function()
+					if self.currentDisplay then
+						self.currentDisplay:RemoveAllBars()
+					end
+				end,
+			}, {
+				text = "Windows",
+				owner = drop,
+				hasArrow = true,
+				menuList = {
+				},
+			}, {
+				text = "Output",
+				owner = drop,
+				hasArrow = true,
+				menuList = {
+					{
+						text = "Guild",
+						owner = drop,
+						func = function()
+							if self.currentDisplay then
+								-- Later make this have a count
+								self.currentDisplay:Output(self.printNum, "GUILD")
+							end
+						end,
+					}, {
+						text = "Party",
+						owner = drop,
+						func = function()
+							if self.currentDisplay then
+								self.currentDisplay:Output(self.printNum, "PARTY")
+							end
+						end,
+					}, {
+						text = "Say",
+						owner = drop,
+						func = function()
+							if self.currentDisplay then
+								self.currentDisplay:Output(self.printNum, "SAY")
+							end
+						end
+					}, {
+						text = "Whisper",
+						owner = drop,
+						func = function()
+						end,
+					}, {
+						text = "Print",
+						owner = drop,
+						func = function()
+							if self.currentDisplay then
+								self.currentDisplay:Output(self.printNum)
+							end
+						end
+					}, {
+						text = "Count",
+						owner = drop,
+						hasArrow = true,
+						menuList = {
+						},
+					},
+				},
+			}, {
+				text = "hide",
+				owner = drop,
+				func = function()
+					self.frame:Hide()
+				end,
+			}
+		},
+	}
+
+	local count = 0
+	for i = 5, 26, 5 do
+		count = count + 1
+
+		self.menu[1][4].menuList[6].menuList[count] = {
+			text = i or "All",
+			value = count,
+			func = function()
+				self.printNum = i
+				print("Set the output limit to " .. i)
+			end,
+		}
+	end
+
+	self.menu[1][4].menuList[6].menuList[count + 1] = {
+		text = "All",
+		value = count + 1,
+		func = function()
+			self.printNum = nil
+			print("Set the output limit to All")
+		end,
+	}
+
+	UIDropDownMenu_Initialize(drop, function(horse, level, menuList)
+		if not (menuList or self.menu[level]) then return end
+		for k, v in ipairs(menuList or self.menu[level]) do
+			v.value = k
+			UIDropDownMenu_AddButton(v, level)
+		end
+	end, "MENU", 1)
+
+	self.dropDown = drop
+
+	return drop
 end
