@@ -53,91 +53,7 @@ function addon:ADDON_LOADED(name)
 
 	self:UnregisterEvent("ADDON_LOADED")
 
-	local frame = CreateFrame("Frame", "FiendDamage", UIParent)
-	frame:SetHeight(250)
-	frame:SetWidth(300)
-	frame:SetPoint("CENTER")
-	frame:EnableMouse(true)
-	frame:SetMinResize(50, 50)
-	frame:SetMovable(true)
-	frame:SetResizable(true)
-	frame:SetUserPlaced(true)
-	frame:SetClampedToScreen(true)
-	--frame:SetHitRectInsets(
-
-	frame:SetScript("OnMouseUp", function(self, button)
-		if button == "LeftButton" then
-			self:StopMovingOrSizing()
-		end
-	end)
-
-	frame:SetScript("OnMouseDown", function(self, button)
-		if IsModifiedClick("ALT") and button == "LeftButton" then
-			self:StartMoving()
-		elseif button == "RightButton" then
-			if IsModifiedClick("SHIFT") then
-				self.currentDisplay:RemoveAllBars()
-			else
-				ToggleDropDownMenu(1, nil, addon.dropDown, "cursor")
-			end
-		end
-	end)
-
-	frame:SetScript("OnSizeChanged", function(self, width, height)
-		if addon.currentDisplay then
-			addon.currentDisplay.dirty = true
-		end
-	end)
-
-	frame:SetBackdrop({
-		bgFile = [[Interface\Tooltips\UI-Tooltip-Background.tga]], tile = true, tileSize = 16,
-		edgeFile = [[Interface\AddOns\Fiend\media\otravi-semi-full-border.tga]], edgeSize = 32,
-		insets = {left = 0, right = 0, top = 20, bottom = 0},
-	})
-
-	frame:SetBackdropColor(0, 0, 0, 0.8)
-
-	local title = frame:CreateFontString(nil, "OVERLAY")
-	title:SetFont(STANDARD_TEXT_FONT, 16)
-	title:SetText("Fiend")
-	title:SetJustifyH("CENTER")
-	title:SetPoint("CENTER")
-	title:SetPoint("TOP", 0, - 12)
-
-	frame.title = title
-
-	local drag = CreateFrame("Frame", nil, frame)
-	drag:SetHeight(16)
-	drag:SetWidth(16)
-	drag:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", - 1, 1)
-	drag:EnableMouse(true)
-	drag:SetFrameLevel(20)
-
-	drag:SetScript("OnMouseUp", function(self, button)
-		if button == "LeftButton" then
-			frame:StopMovingOrSizing()
-		end
-	end)
-
-	drag:SetScript("OnMouseDown", function(self, button)
-		if button == "LeftButton" and IsModifiedClick("ALT") then
-			frame:StartSizing()
-		end
-	end)
-
-	local texture = drag:CreateTexture(nil, "OVERLAY")
-	texture:SetTexture([[Interface\AddOns\Fiend\media\draghandle.tga]])
-	texture:SetBlendMode("ADD")
-	texture:SetAlpha(0.7)
-	texture:SetAllPoints(drag)
-
-	drag.texture = texture
-	frame.drag = drag
-
-	self.frame = frame
-
 	self.displays = {}
-	self.displayCount = 0
 
 	self.combatTime = {}
 	self.inCombat = {}
@@ -146,12 +62,20 @@ function addon:ADDON_LOADED(name)
 
 	self:CreateDropDown()
 
-	local damage = self.Display("Damage", 16, { 0.6, 0.2, 0.2 }, "dps")
+        local win = self:NewDisplay(title)
+        local damage = win:NewView("Damage", {
+		"SWING_DAMAGE",
+		"RANGE_DAMAGE",
+		"SPELL_DAMAGE",
+		"SPELL_PERIODIC_DAMAGE",
+	}, 16, { 0.6, 0.2, 0.2 })
+
 	damage:Activate()
 
+        --[[
 	self.Display("Healing", 16, { 0.2, 0.6, 0.2 }, "hps")
 	self.Display("OverHealing", 16, { 0.2, 0.6, 0.5 }, "hps")
-
+]]
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 	self:SetScript("OnUpdate", OnUpdate)
@@ -205,22 +129,21 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	-- Track over kill ?
 	local damage = ammount - (over + resist)
 
-	if (event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 and self.displays.OverHealing then
-		self.displays.OverHealing:Update(sourceGUID, over)
+        local overHeal
+	if (event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 then
+                overHeal = over
 	end
 
-	if damage > 0 then
-		local display = self.displays[events[event]]
+	if damage > 0 or overHeal then
+		local pet = self:IsPet(sourceGUID)
 
-		if display then
-			local pet = self:IsPet(sourceGUID)
+		if pet then
+			sourceGUID = pet
+			sourceName = UnitName(self:GetUnit(pet))
+		end
 
-			if pet then
-				sourceGUID = pet
-				sourceName = UnitName(self:GetUnit(pet))
-			end
-
-			display:Update(sourceGUID, damage, sourceName)
+                for name, display in pairs(self.displays) do
+			display:CombatEvent(event, sourceGUID, damage, sourceName, overHeal)
 		end
 	end
 end
