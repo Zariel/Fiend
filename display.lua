@@ -44,7 +44,10 @@ local Display = {}
 
 function Display:Update(guid, ammount, name)
 	local bar = self.guids[guid]
-	bar.name = name
+
+	if name then
+		bar.name = string.match(name, "(%w*)%-?")
+	end
 
 	bar.total = bar.total + ammount
 	self.total = self.total + ammount
@@ -187,7 +190,7 @@ function Display:Output(count, where, player)
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
 		bar = self.bars[i]
-		output(string.format("%d. %s - %d (%d%s) - %d%%", i, bar.name, bar.total, GetDPS(bar), self.suffix, (math.floor(bar.total * 10000 / self.total) / 100)))
+		output(string.format("%d. %s - %d (%d%s - %s) - %d%%", i, bar.name, bar.total, GetDPS(bar), self.suffix, SecondsToTimeAbbrev(Fiend.combatTime[bar.guid]), (math.floor(bar.total * 10000 / self.total) / 100)))
 	end
 end
 
@@ -264,13 +267,12 @@ fiend.Display = setmetatable({}, { __call = function(self, title, size, bg, suff
 
 			local class = select(2, GetPlayerInfoByGUID(guid)) or "WARRIOR"
 			local col = RAID_CLASS_COLORS[class]
-			--local name = UnitName(unit)
 
 			bar:SetHeight(size)
 			bar:SetStatusBarColor(col.r, col.g, col.b)
 			bar.bg:SetVertexColor(col.r, col.g, col.b, 0.1)
 
-			bar.left:SetText(name)
+			bar.left:SetText(UnitName(unit))
 			bar.right:SetText(0)
 
 			bar.guid = guid
@@ -279,7 +281,6 @@ fiend.Display = setmetatable({}, { __call = function(self, title, size, bg, suff
 			bar.pos = 0
 			bar.class = class
 			bar.col = col
-			--bar.name = name
 
 			fiend.combatTime[guid] = 0
 

@@ -12,16 +12,15 @@ local timer = 0
 local OnUpdate = function(self, elapsed)
 	timer = timer + elapsed
 
+	for unit, guid in self:IterateUnitRoster() do
+		if UnitAffectingCombat(unit) then
+			self.combatTime[guid] = (self.combatTime[guid] or 0) + timer
+		end
+	end
+
 	if timer > 0.5 then
 		if self.currentDisplay and self.currentDisplay.dirty then
 			self.currentDisplay:UpdateDisplay()
-		end
-
-		-- Dont throttle this ?
-		for unit, guid in self:IterateUnitRoster() do
-			if UnitAffectingCombat(unit) then
-				self.combatTime[guid] = (self.combatTime[guid] or 0) + timer
-			end
 		end
 
 		if self.currentDisplay and self.currentDisplay.tip then
