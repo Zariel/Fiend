@@ -283,17 +283,21 @@ function fiend:NewDisplay(title)
 	title = title or #self.displays + 1
 	if self.displays[title] then return end
 
-	local t = setmetatable({}, { __index = Display } )
+	local t = {
+		views = {},
+		menu = {},
+		events = {},
+		numViews = 0
+	}
 
-	t.views = {}
-	t.menu = {}
-	t:CreateFrame(title)
-	t:ToolTip()
-	t.numViews = 0
+	local display = setmetatable(t, { __index = Display } )
 
-	self.displays[title] = t
+	display:CreateFrame(title)
+	display:ToolTip()
 
-	return t
+	self.displays[title] = display
+
+	return display
 end
 
 function Display:CombatEvent(event, guid, ammount, name, overHeal)
@@ -314,8 +318,6 @@ function Display:NewView(title, events, size, bg, color)
 	if self.views[title] then return self.views[title] end
 
 	local t = setmetatable({}, { __index = View })
-
-	self.events = {}
 
 	for i, event in pairs(events) do
 		self.events[event] = self.events[event] or {}
