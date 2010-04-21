@@ -44,13 +44,9 @@ function addon:ADDON_LOADED(name)
 
 	self.displays = {}
 
-	self.combatTime = {}
-	self.inCombat = {}
-
 	self.printNum = 10
 
-	self:CreateDropDown()
-
+	-- Displays are the windows
 	local win = self:NewDisplay("main")
 	-- Viewsyntax:
 	-- Display:NewView(String name, String[] events, int barSize, int[]
@@ -63,9 +59,10 @@ function addon:ADDON_LOADED(name)
 		"SPELL_PERIODIC_DAMAGE",
 	}, 16, { 0.6, 0.2, 0.2 })
 
-	--damage:Activate()
-	local healing = win:NewView("Healing", { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.2 })
-	healing.overHeal = true
+	local heal = win:NewView("Healing", { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.2 })
+
+	local overHeal = win:NewView("OverHealing", { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.5 })
+	overHeal.overHeal = true
 
         --[[
 	self.Display("Healing", 16, { 0.2, 0.6, 0.2 }, "hps")
@@ -142,10 +139,6 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			display:CombatEvent(event, sourceGUID, damage, sourceName, overHeal)
 		end
 	end
-end
-
-function addon:CreateDropDown()
-
 end
 
 _G.Fiend = addon
