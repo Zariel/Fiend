@@ -12,12 +12,6 @@ local timer = 0
 local OnUpdate = function(self, elapsed)
 	timer = timer + elapsed
 
-	for unit, guid in self:IterateUnitRoster() do
-		if UnitAffectingCombat(unit) then
-			self.combatTime[guid] = (self.combatTime[guid] or 0) + timer
-		end
-	end
-
 	if timer > 0.5 then
 		for i, d in pairs(self.displays) do
 			d:OnUpdate(timer)
