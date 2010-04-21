@@ -41,7 +41,7 @@ local pool = setmetatable({}, {
 
 function View:Update(guid, ammount, name)
 	local bar = self.guids[guid]
-	bar.name = name
+	bar.name = string.match(name, "(.*)\-?")
 
 	bar.total = bar.total + ammount
 	self.total = self.total + ammount
@@ -121,14 +121,14 @@ end
 function View:Activate()
 	if self.isActive then return end
 
-	if self.display.currentDisplay then
-		self.display.currentDisplay:Deactivate()
+	if self.display.currentView then
+		self.display.currentView:Deactivate()
 	end
 
 	self.display.frame.title:SetText(self.title)
 	self.display.frame:SetBackdropBorderColor(unpack(self.bg))
 
-	self.display.currentDisplay = self
+	self.display.currentView = self
 
 	--[[
 	if fiend.dropDown:IsShown() then
@@ -157,7 +157,7 @@ function View:Deactivate(clean)
 		end
 	end
 
-	self.display.currentDisplay = nil
+	self.display.currentView = nil
 end
 
 function View:Output(count, where, player)
@@ -189,8 +189,8 @@ function View:Output(count, where, player)
 end
 
 function Display:OnUpdate(elapsed)
-	if self.currentDisplay then
-		self.currentDisplay:UpdateDisplay()
+	if self.currentView then
+		self.currentView:UpdateDisplay()
 	end
 end
 
@@ -218,7 +218,7 @@ function Display:CreateFrame(title)
 			s:StartMoving()
 		elseif button == "RightButton" then
 			if IsModifiedClick("SHIFT") then
-				self.currentDisplay:RemoveAllBars()
+				self.currentView:RemoveAllBars()
 			else
 				ToggleDropDownMenu(1, nil, self.dropDown, "cursor")
 			end
@@ -226,8 +226,8 @@ function Display:CreateFrame(title)
 	end)
 
 	frame:SetScript("OnSizeChanged", function(s, width, height)
-		if self.currentDisplay then
-			self.currentDisplay.dirty = true
+		if self.currentView then
+			self.currentView.dirty = true
 		end
 	end)
 
@@ -289,6 +289,7 @@ function fiend:NewDisplay(title)
 	t.menu = {}
 	t:CreateFrame(title)
 	t:ToolTip()
+	t.numViews = 0
 
 	self.displays[title] = t
 
@@ -301,7 +302,7 @@ function Display:CombatEvent(event, guid, ammount, name, overHeal)
 	end
 
 	for i, d in pairs(self.events[event]) do
-		if overHeal and self.overHeal then
+		if overHeal and d.overHeal then
 			d:Update(guid, overHeal, name)
 		elseif ammount > 0 then
 			d:Update(guid, ammount, name)
@@ -405,7 +406,7 @@ function Display:NewView(title, events, size, bg, color)
 	local drop = self.dropDown
 
 	local menu = {
-		text = name,
+		text = title,
 		owner = drop,
 		func = function(self)
 			t:Activate()
@@ -418,11 +419,13 @@ function Display:NewView(title, events, size, bg, color)
 		UIDropDownMenu_Refresh(self.dropDown)
 	end
 
-	self.views[title] = t
-
-	if #self.views == 1 then
-		self:Activate()
+	if self.numViews == 0 then
+		t:Activate()
 	end
+
+	self.numViews = self.numViews + 1
+
+	self.views[title] = t
 
 	return t
 end
@@ -434,15 +437,15 @@ function Display:ToolTip()
 	self.menu = {
 		{
 			{
-				text = "Fiend - ",
+				text = "Fiend",
 				owner = drop,
 				isTitle = true,
 			}, {
 				text = "Reset",
 				owner = drop,
 				func = function()
-					if self.currentDisplay then
-						self.currentDisplay:RemoveAllBars()
+					if self.currentView then
+						self.currentView:RemoveAllBars()
 					end
 				end,
 			}, {
@@ -460,25 +463,25 @@ function Display:ToolTip()
 						text = "Guild",
 						owner = drop,
 						func = function()
-							if self.currentDisplay then
+							if self.currentView then
 								-- Later make this have a count
-								self.currentDisplay:Output(self.printNum, "GUILD")
+								self.currentView:Output(self.printNum, "GUILD")
 							end
 						end,
 					}, {
 						text = "Party",
 						owner = drop,
 						func = function()
-							if self.currentDisplay then
-								self.currentDisplay:Output(self.printNum, "PARTY")
+							if self.currentView then
+								self.currentView:Output(self.printNum, "PARTY")
 							end
 						end,
 					}, {
 						text = "Say",
 						owner = drop,
 						func = function()
-							if self.currentDisplay then
-								self.currentDisplay:Output(self.printNum, "SAY")
+							if self.currentView then
+								self.currentView:Output(self.printNum, "SAY")
 							end
 						end
 					}, {
@@ -490,8 +493,8 @@ function Display:ToolTip()
 						text = "Print",
 						owner = drop,
 						func = function()
-							if self.currentDisplay then
-								self.currentDisplay:Output(self.printNum)
+							if self.currentView then
+								self.currentView:Output(self.printNum)
 							end
 						end
 					}, {

@@ -51,15 +51,21 @@ function addon:ADDON_LOADED(name)
 
 	self:CreateDropDown()
 
-        local win = self:NewDisplay("main")
-        local damage = win:NewView("Damage", {
+	local win = self:NewDisplay("main")
+	-- Viewsyntax:
+	-- Display:NewView(String name, String[] events, int barSize, int[]
+	-- headerColor, int[] barColor)
+	-- Only name, events and size are required.
+	local damage = win:NewView("Damage", {
 		"SWING_DAMAGE",
 		"RANGE_DAMAGE",
 		"SPELL_DAMAGE",
 		"SPELL_PERIODIC_DAMAGE",
 	}, 16, { 0.6, 0.2, 0.2 })
 
-	damage:Activate()
+	--damage:Activate()
+	local healing = win:NewView("Healing", { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.2 })
+	healing.overHeal = true
 
         --[[
 	self.Display("Healing", 16, { 0.2, 0.6, 0.2 }, "hps")
