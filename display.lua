@@ -1,30 +1,29 @@
 local fiend = _G.Fiend
 
-local texture = [[Interface\Addons\Fiend\media\HalV.tga]]
+local Display = {
+}
+
+local View = {
+	texture = [[Interface\addons\Fiend\media\HalV.tga]],
+	max = 0,
+	isActive = false,
+	total = 0,
+	bg = { 0.3, 0.3, 0.3 },
+}
 
 local floor = math.floor
 
-local GetDPS = function(self)
-	if fiend.combatTime[self.guid] > 0 then
-		return floor(self.total / fiend.combatTime[self.guid])
-	else
-		return 0
-	end
-end
-
 local tip = GameTooltip
-local OnEnter = function(self)
+function Display.OnEnter(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
-		tip:AddDoubleLine(self.pos .. ". " .. self.name, GetDPS(self) .. " " .. self.parent.suffix, self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
+		tip:AddDoubleLine(self.pos .. ". " .. self.name, "lal", self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
 		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
 
 		tip:Show()
 		self.parent.tip = true
 	end
 end
-
-fiend.OnEnter = OnEnter
 
 local pool = setmetatable({}, {
 	__mode = "k",
@@ -40,14 +39,9 @@ local pool = setmetatable({}, {
 	end
 })
 
-local Display = {}
-
-function Display:Update(guid, ammount, name)
+function View:Update(guid, ammount, name)
 	local bar = self.guids[guid]
-
-	if name then
-		bar.name = string.match(name, "(%w*)%-?")
-	end
+	bar.name = string.match(name, "(.*)\-?")
 
 	bar.total = bar.total + ammount
 	self.total = self.total + ammount
@@ -59,13 +53,13 @@ function Display:Update(guid, ammount, name)
 	self.dirty = true
 end
 
-function Display:UpdateDisplay()
-	if not self.isActive or #self.bars == 0 or not fiend.frame:IsShown() then return end
+function View:UpdateDisplay()
+	if not self.isActive or #self.bars == 0 or not self.display.frame:IsShown() then return end
 
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
 
-	local total = math.floor((fiend.frame:GetHeight() - 32) / self.size)
-	local width = fiend.frame:GetWidth()
+	local total = math.floor((self.display.frame:GetHeight() - 32) / self.size)
+	local width = self.display.frame:GetWidth()
 
 	local size = self.size
 
@@ -81,7 +75,7 @@ function Display:UpdateDisplay()
 			bar:SetValue(100 * (bar.total / max))
 
 			if bar.pos ~= i then
-				bar:SetPoint("TOP", fiend.frame, "TOP", 0, ((i - 1) * -size) - 32)
+				bar:SetPoint("TOP", self.display.frame, "TOP", 0, ((i - 1) * -size) - 32)
 
 				bar.left:SetText(i .. ". " .. bar.name)
 
@@ -95,7 +89,7 @@ function Display:UpdateDisplay()
 	self.dirty = false
 end
 
-function Display:RemoveAllBars()
+function View:RemoveAllBars()
 	local bar
 	for i = 1, #self.bars do
 		bar = table.remove(self.bars, 1)
@@ -104,16 +98,14 @@ function Display:RemoveAllBars()
 
 		self.guids[bar.guid] = nil
 
-		fiend.combatTime[bar.guid] = 0
-
 		table.insert(pool, bar)
 	end
 
 	self.total = 0
 end
 
-function Display:Resizing(width, height)
-	local total = math.floor((height or fiend.frame:GetHeight() - 32) / self.size)
+function View:Resizing(width, height)
+	local total = math.floor((height or self.display.frame:GetHeight() - 32) / self.size)
 
 	local bar
 	for i = 1, #self.bars do
@@ -126,28 +118,30 @@ function Display:Resizing(width, height)
 	end
 end
 
-function Display:Activate()
+function View:Activate()
 	if self.isActive then return end
 
-	if fiend.currentDisplay then
-		fiend.currentDisplay:Deactivate()
+	if self.display.currentView then
+		self.display.currentView:Deactivate()
 	end
 
-	fiend.frame.title:SetText(self.title)
-	fiend.frame:SetBackdropBorderColor(unpack(self.bg))
+	self.display.frame.title:SetText(self.title)
+	self.display.frame:SetBackdropBorderColor(unpack(self.bg))
 
-	fiend.currentDisplay = self
+	self.display.currentView = self
 
+	--[[
 	if fiend.dropDown:IsShown() then
 		UIDropDownMenu_Refresh(fiend.dropDown)
 	end
+	]]
 
 	self.isActive = true
 	-- Update faster
 	self:UpdateDisplay()
 end
 
-function Display:Deactivate(clean)
+function View:Deactivate(clean)
 	if not self.isActive then return end
 
 	self.isActive = false
@@ -163,10 +157,10 @@ function Display:Deactivate(clean)
 		end
 	end
 
-	fiend.currentDisplay = nil
+	self.display.currentView = nil
 end
 
-function Display:Output(count, where, player)
+function View:Output(count, where, player)
 	if #self.bars == 0 then return end
 
 	local output
@@ -190,126 +184,369 @@ function Display:Output(count, where, player)
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
 		bar = self.bars[i]
-		output(string.format("%d. %s - %d (%d%s - %s) - %d%%", i, bar.name, bar.total, GetDPS(bar), self.suffix, SecondsToTimeAbbrev(Fiend.combatTime[bar.guid]), (math.floor(bar.total * 10000 / self.total) / 100)))
+		output(string.format("%d. %s - %d %d%%", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100)))
 	end
 end
 
-fiend.Display = setmetatable({}, { __call = function(self, title, size, bg, suffix)
-	if not fiend.displays[title] then
-		local t = setmetatable({}, { __index = Display } )
+function Display:OnUpdate(elapsed)
+	if self.currentView then
+		self.currentView:UpdateDisplay()
+	end
+end
 
-		fiend.displayCount = fiend.displayCount + 1
+function Display:CreateFrame(title)
+	local frame = CreateFrame("Frame", "FiendDamage" .. title, UIParent)
+	frame:SetHeight(250)
+	frame:SetWidth(300)
+	frame:SetPoint("CENTER")
+	frame:EnableMouse(true)
+	frame:SetMinResize(50, 50)
+	frame:SetMovable(true)
+	frame:SetResizable(true)
+	frame:SetUserPlaced(true)
+	frame:SetClampedToScreen(true)
+	--frame:SetHitRectInsets(
 
-		t.bars = {}
-		t.max = 0
-		t.isActive = false
-		t.size = size
-		t.title = title
-		t.total = 0
-		t.bg = bg or { 0.3, 0.3, 0.3 }
-		t.suffix = suffix
+	frame:SetScript("OnMouseUp", function(self, button)
+		if button == "LeftButton" then
+			self:StopMovingOrSizing()
+		end
+	end)
 
-		t.guids = setmetatable({}, { __index = function(self, guid)
-			local bar
-			if next(pool) then
-				bar = table.remove(pool, 1)
+	frame:SetScript("OnMouseDown", function(s, button)
+		if IsModifiedClick("ALT") and button == "LeftButton" then
+			s:StartMoving()
+		elseif button == "RightButton" then
+			if IsModifiedClick("SHIFT") then
+				self.currentView:RemoveAllBars()
 			else
-				bar = CreateFrame("Statusbar", nil, fiend.frame)
-				bar:SetStatusBarTexture(texture)
-				bar:SetMinMaxValues(0, 100)
-				bar:SetPoint("LEFT", 1, 0)
-				bar:SetPoint("RIGHT", - 1, 0)
-				bar:EnableMouse(true)
-				bar:Hide()
-
-				bar:SetScript("OnEnter", OnEnter)
-				bar:SetScript("OnLeave", function(self) tip:Hide(); self.parent.tip = false end)
-
-				local bg = bar:CreateTexture(nil, "BACKGROUND")
-				bg:SetTexture(texture)
-				bg:SetAllPoints(bar)
-
-				bar.bg = bg
-
-				local left = bar:CreateFontString(nil, "OVERLAY")
-				left:SetFont(STANDARD_TEXT_FONT, size - 2)
-				left:SetPoint("LEFT", bar, "LEFT", 5, 0)
-				left:SetPoint("BOTTOM")
-				left:SetPoint("TOP")
-				left:SetShadowColor(0, 0, 0, 0.8)
-				left:SetShadowOffset(0.8, - 0.8)
-
-				bar.left = left
-
-				local right = bar:CreateFontString(nil, "OVERLAY")
-				right:SetFont(STANDARD_TEXT_FONT, size - 2)
-				right:SetPoint("RIGHT", fiend.frame, "RIGHT", - 5, 0)
-				right:SetPoint("TOP")
-				right:SetPoint("BOTTOM")
-				right:SetJustifyH("RIGHT")
-				right:SetShadowColor(0, 0, 0, 0.8)
-				right:SetShadowOffset(0.8, - 0.8)
-
-				bar.right = right
+				ToggleDropDownMenu(1, nil, self.dropDown, "cursor")
 			end
+		end
+	end)
 
-			local unit = fiend:GetUnit(guid)
-			if not unit then
-				if UnitInRaid("player") then
-					fiend:RAID_ROSTER_UPDATE()
-				else
-					fiend:PARTY_MEMBERS_CHANGED()
-				end
+	frame:SetScript("OnSizeChanged", function(s, width, height)
+		if self.currentView then
+			self.currentView.dirty = true
+		end
+	end)
 
-				unit = fiend:GetUnit(guid)
-				-- PRAY WITH ME
-			end
+	frame:SetBackdrop({
+		bgFile = [[Interface\Tooltips\UI-Tooltip-Background.tga]], tile = true, tileSize = 16,
+		edgeFile = [[Interface\addons\Fiend\media\otravi-semi-full-border.tga]], edgeSize = 32,
+		insets = {left = 0, right = 0, top = 20, bottom = 0},
+	})
 
-			local class = select(2, GetPlayerInfoByGUID(guid)) or "WARRIOR"
-			local col = RAID_CLASS_COLORS[class]
+	frame:SetBackdropColor(0, 0, 0, 0.8)
 
-			bar:SetHeight(size)
-			bar:SetStatusBarColor(col.r, col.g, col.b)
-			bar.bg:SetVertexColor(col.r, col.g, col.b, 0.1)
+	local title = frame:CreateFontString(nil, "OVERLAY")
+	title:SetFont(STANDARD_TEXT_FONT, 16)
+	title:SetText("Fiend")
+	title:SetJustifyH("CENTER")
+	title:SetPoint("CENTER")
+	title:SetPoint("TOP", 0, - 12)
 
-			bar.left:SetText(UnitName(unit))
-			bar.right:SetText(0)
+	frame.title = title
 
-			bar.guid = guid
-			bar.parent = t
-			bar.total = 0
-			bar.pos = 0
-			bar.class = class
-			bar.col = col
+	local drag = CreateFrame("Frame", nil, frame)
+	drag:SetHeight(16)
+	drag:SetWidth(16)
+	drag:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", - 1, 1)
+	drag:EnableMouse(true)
+	drag:SetFrameLevel(20)
 
-			fiend.combatTime[guid] = 0
+	drag:SetScript("OnMouseUp", function(self, button)
+		if button == "LeftButton" then
+			frame:StopMovingOrSizing()
+		end
+	end)
 
-			table.insert(t.bars, bar)
-			rawset(self, guid, bar)
+	drag:SetScript("OnMouseDown", function(self, button)
+		if button == "LeftButton" and IsModifiedClick("ALT") then
+			frame:StartSizing()
+		end
+	end)
 
-			bar:Hide()
+	local texture = drag:CreateTexture(nil, "OVERLAY")
+	texture:SetTexture([[Interface\addons\Fiend\media\draghandle.tga]])
+	texture:SetBlendMode("ADD")
+	texture:SetAlpha(0.7)
+	texture:SetAllPoints(drag)
 
-			return bar
-		end})
+	drag.texture = texture
+	frame.drag = drag
 
-		fiend.displays[title] = t
+	self.frame = frame
+end
+
+function fiend:NewDisplay(title)
+	title = title or #self.displays + 1
+	if self.displays[title] then return end
+
+	local t = setmetatable({}, { __index = Display } )
+
+	t.views = {}
+	t.menu = {}
+	t:CreateFrame(title)
+	t:ToolTip()
+	t.numViews = 0
+
+	self.displays[title] = t
+
+	return t
+end
+
+function Display:CombatEvent(event, guid, ammount, name, overHeal)
+	if not self.events[event] then
+		return
 	end
 
-	local drop = fiend.dropDown
+	for i, d in pairs(self.events[event]) do
+		if overHeal and d.overHeal then
+			d:Update(guid, overHeal, name)
+		elseif ammount > 0 then
+			d:Update(guid, ammount, name)
+		end
+	end
+end
+
+function Display:NewView(title, events, size, bg, color)
+	if self.views[title] then return self.views[title] end
+
+	local t = setmetatable({}, { __index = View })
+
+	self.events = {}
+	t.bars = {}
+
+	for i, event in pairs(events) do
+		self.events[event] = self.events[event] or {}
+		table.insert(self.events[event], t)
+	end
+
+	t.size = size
+	t.title = title
+	t.bg = bg or self.bg
+	t.color = color
+	t.display = self
+	t.total = 0
+
+	t.guids = setmetatable({}, { __index = function(s, guid)
+		local bar
+		if next(pool) then
+			bar = table.remove(pool, 1)
+		else
+			bar = CreateFrame("Statusbar", nil, self.frame)
+			bar:SetStatusBarTexture(t.texture)
+			bar:SetMinMaxValues(0, 100)
+			bar:SetPoint("LEFT", 1, 0)
+			bar:SetPoint("RIGHT", - 1, 0)
+			bar:EnableMouse(true)
+			bar:Hide()
+
+			bar:SetScript("OnEnter", self.OnEnter)
+			bar:SetScript("OnLeave", function(self) tip:Hide(); self.tip = false end)
+
+			local bg = bar:CreateTexture(nil, "BACKGROUND")
+			bg:SetTexture(self.texture)
+			bg:SetAllPoints(bar)
+
+			bar.bg = bg
+
+			local left = bar:CreateFontString(nil, "OVERLAY")
+			left:SetFont(STANDARD_TEXT_FONT, size - 2)
+			left:SetPoint("LEFT", bar, "LEFT", 5, 0)
+			left:SetPoint("BOTTOM")
+			left:SetPoint("TOP")
+			left:SetShadowColor(0, 0, 0, 0.8)
+			left:SetShadowOffset(0.8, - 0.8)
+
+			bar.left = left
+
+			local right = bar:CreateFontString(nil, "OVERLAY")
+			right:SetFont(STANDARD_TEXT_FONT, size - 2)
+			right:SetPoint("RIGHT", self.frame, "RIGHT", - 5, 0)
+			right:SetPoint("TOP")
+			right:SetPoint("BOTTOM")
+			right:SetJustifyH("RIGHT")
+			right:SetShadowColor(0, 0, 0, 0.8)
+			right:SetShadowOffset(0.8, - 0.8)
+
+			bar.right = right
+		end
+
+		local col = t.color
+
+		if not col then
+			local unit = fiend:GetUnit(guid)
+			local class = select(2, GetPlayerInfoByGUID(guid)) or "WARRIOR"
+			col = RAID_CLASS_COLORS[class]
+		end
+
+		bar:SetHeight(size)
+		bar:SetStatusBarColor(col.r, col.g, col.b)
+		bar.bg:SetVertexColor(col.r, col.g, col.b, 0.1)
+
+		bar.left:SetText(name)
+		bar.right:SetText(0)
+
+		bar.guid = guid
+		bar.parent = t
+		bar.total = 0
+		bar.pos = 0
+		bar.col = col
+
+		table.insert(t.bars, bar)
+		rawset(s, guid, bar)
+
+		bar:Hide()
+
+		return bar
+	end})
+
+	local drop = self.dropDown
 
 	local menu = {
 		text = title,
 		owner = drop,
 		func = function(self)
-			fiend.displays[title]:Activate()
+			t:Activate()
 		end,
 	}
 
-	fiend.menu[1][3].menuList[#fiend.menu[1][3].menuList + 1] = menu
+	self.menu[1][3].menuList[#self.menu[1][3].menuList + 1] = menu
 
-	if fiend.dropDown:IsShown() then
-		UIDropDownMenu_Refresh(fiend.dropDown)
+	if self.dropDown:IsShown() then
+		UIDropDownMenu_Refresh(self.dropDown)
 	end
 
-	return fiend.displays[title]
-end})
+	if self.numViews == 0 then
+		t:Activate()
+	end
+
+	self.numViews = self.numViews + 1
+
+	self.views[title] = t
+
+	return t
+end
+
+function Display:ToolTip()
+	local drop = CreateFrame("Frame", "FiendDropDown", UIParent, "UIDropDownMenuTemplate")
+
+	-- </3
+	self.menu = {
+		{
+			{
+				text = "Fiend",
+				owner = drop,
+				isTitle = true,
+			}, {
+				text = "Reset",
+				owner = drop,
+				func = function()
+					if self.currentView then
+						self.currentView:RemoveAllBars()
+					end
+				end,
+			}, {
+				text = "Windows",
+				owner = drop,
+				hasArrow = true,
+				menuList = {
+				},
+			}, {
+				text = "Output",
+				owner = drop,
+				hasArrow = true,
+				menuList = {
+					{
+						text = "Guild",
+						owner = drop,
+						func = function()
+							if self.currentView then
+								-- Later make this have a count
+								self.currentView:Output(self.printNum, "GUILD")
+							end
+						end,
+					}, {
+						text = "Party",
+						owner = drop,
+						func = function()
+							if self.currentView then
+								self.currentView:Output(self.printNum, "PARTY")
+							end
+						end,
+					}, {
+						text = "Say",
+						owner = drop,
+						func = function()
+							if self.currentView then
+								self.currentView:Output(self.printNum, "SAY")
+							end
+						end
+					}, {
+						text = "Whisper",
+						owner = drop,
+						func = function()
+						end,
+					}, {
+						text = "Print",
+						owner = drop,
+						func = function()
+							if self.currentView then
+								self.currentView:Output(self.printNum)
+							end
+						end
+					}, {
+						text = "Count",
+						owner = drop,
+						hasArrow = true,
+						menuList = {
+						},
+					},
+				},
+			}, {
+				text = "hide",
+				owner = drop,
+				func = function()
+					self.frame:Hide()
+				end,
+			}
+		},
+	}
+
+	local count = 0
+	for i = 5, 26, 5 do
+		count = count + 1
+
+		self.menu[1][4].menuList[6].menuList[count] = {
+			text = i or "All",
+			value = count,
+			func = function()
+				self.printNum = i
+				print("Set the output limit to " .. i)
+			end,
+		}
+	end
+
+	self.menu[1][4].menuList[6].menuList[count + 1] = {
+		text = "All",
+		value = count + 1,
+		func = function()
+			self.printNum = nil
+			print("Set the output limit to All")
+		end,
+	}
+
+	UIDropDownMenu_Initialize(drop, function(horse, level, menuList)
+		if not (menuList or self.menu[level]) then return end
+		for k, v in ipairs(menuList or self.menu[level]) do
+			v.value = k
+			UIDropDownMenu_AddButton(v, level)
+		end
+	end, "MENU", 1)
+
+	self.dropDown = drop
+
+	return drop
+end
