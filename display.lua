@@ -316,13 +316,13 @@ function Display:NewView(title, events, size, bg, color)
 	local t = setmetatable({}, { __index = View })
 
 	self.events = {}
-	t.bars = {}
 
 	for i, event in pairs(events) do
 		self.events[event] = self.events[event] or {}
 		table.insert(self.events[event], t)
 	end
 
+	t.bars = {}
 	t.size = size
 	t.title = title
 	t.bg = bg or self.bg
