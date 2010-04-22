@@ -64,15 +64,12 @@ function addon:ADDON_LOADED(name)
 	local overHeal = win:NewView("OverHealing", { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.5 })
 	overHeal.overHeal = true
 
-        --[[
-	self.Display("Healing", 16, { 0.2, 0.6, 0.2 }, "hps")
-	self.Display("OverHealing", 16, { 0.2, 0.6, 0.5 }, "hps")
-]]
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 	self:Show()
 
-	ldb = LibStub("LibDataBroker-1.1", true)
+	ldb = LibStub and LibStub("LibDataBroker-1.1", true)
+
 	if ldb then
 		local obj = ldb:NewDataObject("Fiend", {
 			type = "launcher",
@@ -80,12 +77,6 @@ function addon:ADDON_LOADED(name)
 			OnClick = function(self, button)
 				if button == "RightButton" then
 					ToggleDropDownMenu(1, nil, addon.dropDown, "cursor")
-				else
-					if addon.frame:IsShown() then
-						addon.frame:Hide()
-					else
-						addon.frame:Show()
-					end
 				end
 			end,
 		})

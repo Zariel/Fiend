@@ -48,7 +48,11 @@ function View:Update(guid, ammount, name)
 
 	-- bar.per = math.floor(bar.total / self.total * 100)
 
-	bar.right:SetText(bar.total)
+	if bar.total > 1e3 then
+		bar.right:SetText(math.floor((bar.total * 10) / 100) / 100 .. "k")
+	else
+		bar.right:SetText(bar.total)
+	end
 
 	self.dirty = true
 end
