@@ -177,11 +177,7 @@ function View:Output(count, where, player)
 		end
 	end
 
-	-- I want a total width of 32 chars
-	local width = 32
-	width = (width - (string.len("Fiend " .. self.title))) / 2
-
-	output(string.rep("=", width) .."Fiend " .. self.title .. string.rep("=", width))
+	output("Fiend " .. self.title .. ":")
 
 	-- Need to do a double pass
 	local bar
@@ -291,7 +287,8 @@ function fiend:NewDisplay(title)
 		views = {},
 		menu = {},
 		events = {},
-		numViews = 0
+		numViews = 0,
+		title = title,
 	}
 
 	local display = setmetatable(t, { __index = Display } )
@@ -419,7 +416,7 @@ function Display:NewView(title, events, size, bg, color)
 		end,
 	}
 
-	self.menu[1][3].menuList[#self.menu[1][3].menuList + 1] = menu
+	self.menu[1][4].menuList[#self.menu[1][4].menuList + 1] = menu
 
 	if self.dropDown:IsShown() then
 		UIDropDownMenu_Refresh(self.dropDown)
@@ -437,13 +434,19 @@ function Display:NewView(title, events, size, bg, color)
 end
 
 function Display:ToolTip()
-	local drop = CreateFrame("Frame", "FiendDropDown", UIParent, "UIDropDownMenuTemplate")
+	local drop = CreateFrame("Frame", "FiendDropDown_" .. self.title, UIParent, "UIDropDownMenuTemplate")
+
+	local title = "Fiend"
+
+	if self.currentView then
+		title = "Fiend - " .. self.currentView.title
+	end
 
 	-- </3
 	self.menu = {
 		{
 			{
-				text = "Fiend",
+				text = title,
 				owner = drop,
 				isTitle = true,
 			}, {
@@ -452,6 +455,14 @@ function Display:ToolTip()
 				func = function()
 					if self.currentView then
 						self.currentView:RemoveAllBars()
+					end
+				end,
+			}, {
+				text = "Reset All",
+				owner = drop,
+				func = function()
+					for i, d in pairs(self.views) do
+						d:RemoveAllBars()
 					end
 				end,
 			}, {
@@ -525,7 +536,7 @@ function Display:ToolTip()
 	for i = 5, 26, 5 do
 		count = count + 1
 
-		self.menu[1][4].menuList[6].menuList[count] = {
+		self.menu[1][5].menuList[6].menuList[count] = {
 			text = i or "All",
 			value = count,
 			func = function()
@@ -535,7 +546,7 @@ function Display:ToolTip()
 		}
 	end
 
-	self.menu[1][4].menuList[6].menuList[count + 1] = {
+	self.menu[1][5].menuList[6].menuList[count + 1] = {
 		text = "All",
 		value = count + 1,
 		func = function()
