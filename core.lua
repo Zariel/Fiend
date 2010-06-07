@@ -21,9 +21,21 @@ local OnUpdate = function(self, elapsed)
 	end
 end
 
+local bor = function(...)
+	if select("#", ...) > 0 then
+		local r = 0
+		for i = 0, select("#", ...) do
+			r = bit.bor(r, select(i, ...))
+		end
+	else
+		return 0
+	end
+end
+
 local ldb
 local band = bit.band
-local filter = COMBATLOG_OBJECT_AFFILIATION_RAID + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_MINE
+local filter = bit.bor(COMBATLOG_OBJECT_AFFILIATION_RAID, COMBATLOG_OBJECT_AFFILIATION_PARTY)
+filter = bit.bor(filter, COMBATLOG_OBJECT_AFFILIATION_MINE)
 
 local events = {
 	["SWING_DAMAGE"] = "Damage",

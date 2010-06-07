@@ -134,11 +134,9 @@ function View:Activate()
 
 	self.display.currentView = self
 
-	--[[
-	if fiend.dropDown:IsShown() then
-		UIDropDownMenu_Refresh(fiend.dropDown)
+	if self.display.dropDown:IsShown() then
+		UIDropDownMenu_Refresh(self.dropDown)
 	end
-	]]
 
 	self.isActive = true
 	-- Update faster
@@ -189,7 +187,7 @@ function View:Output(count, where, player)
 end
 
 function Display:OnUpdate(elapsed)
-	if self.currentView then
+	if self.currentView and self.currentView.dirty then
 		self.currentView:UpdateDisplay()
 	end
 end
