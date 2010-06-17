@@ -120,6 +120,8 @@ function View:Resizing(width, height)
 			bar:Show()
 		end
 	end
+
+	self.dirty = true
 end
 
 function View:Activate()
