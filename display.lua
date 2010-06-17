@@ -135,7 +135,7 @@ function View:Activate()
 	self.display.currentView = self
 
 	if self.display.dropDown:IsShown() then
-		UIDropDownMenu_Refresh(self.dropDown)
+		UIDropDownMenu_Refresh(self.display.dropDown)
 	end
 
 	self.isActive = true
@@ -464,7 +464,7 @@ function Display:ToolTip()
 					end
 				end,
 			}, {
-				text = "Windows",
+				text = "Displays",
 				owner = drop,
 				hasArrow = true,
 				menuList = {
@@ -521,10 +521,16 @@ function Display:ToolTip()
 					},
 				},
 			}, {
-				text = "hide",
+				text = self.frame:IsShown() and "Hide" or "Show",
 				owner = drop,
 				func = function()
-					self.frame:Hide()
+					if self.frame:IsShown() then
+						self.frame:Hide()
+						self.menu[1][6].text = "Show"
+					else
+						self.frame:Show()
+						self.menu[1][6].text = "Hide"
+					end
 				end,
 			}
 		},
@@ -560,6 +566,15 @@ function Display:ToolTip()
 			UIDropDownMenu_AddButton(v, level)
 		end
 	end, "MENU", 1)
+
+	if fiend.menu then
+		count = #fiend.menu[1][2].menuList
+		fiend.menu[1][2].menuList[count + 1] = {
+			text = self.title,
+			hasArrow = true,
+			menuList = self.menu[1]
+		}
+	end
 
 	self.dropDown = drop
 

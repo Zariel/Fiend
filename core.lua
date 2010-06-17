@@ -7,6 +7,7 @@ local UnitInVehicle = UnitInVehicle
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local UnitName = UnitName
+local pairs = pairs
 
 local timer = 0
 local OnUpdate = function(self, elapsed)
@@ -18,17 +19,6 @@ local OnUpdate = function(self, elapsed)
 		end
 
 		timer = 0
-	end
-end
-
-local bor = function(...)
-	if select("#", ...) > 0 then
-		local r = 0
-		for i = 0, select("#", ...) do
-			r = bit.bor(r, select(i, ...))
-		end
-	else
-		return 0
 	end
 end
 
@@ -51,6 +41,24 @@ local events = {
 
 function addon:ADDON_LOADED(name)
 	if name ~= "Fiend" then return end
+
+	ldb = LibStub and LibStub("LibDataBroker-1.1", true)
+
+	if ldb then
+		self:initDropDown()
+
+		local obj = ldb:NewDataObject("Fiend", {
+			type = "launcher",
+			icon = [[Interface\Icons\Ability_BullRush]],
+			OnClick = function(self, button)
+				if button == "RightButton" then
+					ToggleDropDownMenu(1, nil, addon.dropDown, "cursor")
+				end
+			end,
+		})
+
+		self.dataObj = obj
+	end
 
 	self:UnregisterEvent("ADDON_LOADED")
 
@@ -79,22 +87,6 @@ function addon:ADDON_LOADED(name)
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
 	self:Show()
-
-	ldb = LibStub and LibStub("LibDataBroker-1.1", true)
-
-	if ldb then
-		local obj = ldb:NewDataObject("Fiend", {
-			type = "launcher",
-			icon = [[Interface\Icons\Ability_BullRush]],
-			OnClick = function(self, button)
-				if button == "RightButton" then
-					ToggleDropDownMenu(1, nil, addon.dropDown, "cursor")
-				end
-			end,
-		})
-
-		self.dataObj = obj
-	end
 
 	self:SetScript("OnUpdate", OnUpdate)
 
@@ -142,6 +134,35 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			display:CombatEvent(event, sourceGUID, damage, sourceName, overHeal)
 		end
 	end
+end
+
+function addon:initDropDown()
+	local drop = CreateFrame("Frame", "FiendDropDown", UIParent, "UIDropDownMenuTemplate")
+	self.menu = {
+		{
+			{
+				text = "Fiend",
+				owner = drop,
+				isTitle = true,
+			}, {
+				text = "Windows",
+				owner = drop,
+				hasArrow = true,
+				menuList = {
+				},
+			}
+		}
+	}
+
+	UIDropDownMenu_Initialize(drop, function(horse, level, menuList)
+		if not (menuList or self.menu[level]) then return end
+		for k, v in ipairs(menuList or self.menu[level]) do
+			v.value = k
+			UIDropDownMenu_AddButton(v, level)
+		end
+	end, "MENU", 1)
+
+	self.dropDown = drop
 end
 
 _G.Fiend = addon
