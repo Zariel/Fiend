@@ -1,5 +1,9 @@
 local fiend = _G.Fiend
 
+local ADDON_NAME, Fiend = ...
+Fiend.L = Fiend.L or { }
+local L = setmetatable(Fiend.L, { __index = function(t, s) t[s] = s return s end })
+
 local Display = {
 }
 
@@ -177,7 +181,7 @@ function View:Output(count, where, player)
 		end
 	end
 
-	output("Fiend " .. self.title .. ":")
+	output("Fiend - " .. self.title .. ":")
 
 	-- Need to do a double pass
 	local bar
@@ -450,7 +454,7 @@ function Display:ToolTip()
 				owner = drop,
 				isTitle = true,
 			}, {
-				text = "Reset",
+				text = L["Reset"],
 				owner = drop,
 				func = function()
 					if self.currentView then
@@ -458,7 +462,7 @@ function Display:ToolTip()
 					end
 				end,
 			}, {
-				text = "Reset All",
+				text = L["Reset All"],
 				owner = drop,
 				func = function()
 					for i, d in pairs(self.views) do
@@ -466,18 +470,18 @@ function Display:ToolTip()
 					end
 				end,
 			}, {
-				text = "Displays",
+				text = L["Displays"],
 				owner = drop,
 				hasArrow = true,
 				menuList = {
 				},
 			}, {
-				text = "Output",
+				text = L["Output"],
 				owner = drop,
 				hasArrow = true,
 				menuList = {
 					{
-						text = "Guild",
+						text = L["Guild"],
 						owner = drop,
 						func = function()
 							if self.currentView then
@@ -486,7 +490,7 @@ function Display:ToolTip()
 							end
 						end,
 					}, {
-						text = "Party",
+						text = L["Party"],
 						owner = drop,
 						func = function()
 							if self.currentView then
@@ -494,7 +498,7 @@ function Display:ToolTip()
 							end
 						end,
 					}, {
-						text = "Say",
+						text = L["Say"],
 						owner = drop,
 						func = function()
 							if self.currentView then
@@ -502,12 +506,12 @@ function Display:ToolTip()
 							end
 						end
 					}, {
-						text = "Whisper",
+						text = L["Whisper"],
 						owner = drop,
 						func = function()
 						end,
 					}, {
-						text = "Print",
+						text = L["Print"],
 						owner = drop,
 						func = function()
 							if self.currentView then
@@ -515,7 +519,7 @@ function Display:ToolTip()
 							end
 						end
 					}, {
-						text = "Count",
+						text = L["Count"],
 						owner = drop,
 						hasArrow = true,
 						menuList = {
@@ -523,15 +527,15 @@ function Display:ToolTip()
 					},
 				},
 			}, {
-				text = self.frame:IsShown() and "Hide" or "Show",
+				text = self.frame:IsShown() and L["Hide"] or L["Show"],
 				owner = drop,
 				func = function()
 					if self.frame:IsShown() then
 						self.frame:Hide()
-						self.menu[1][6].text = "Show"
+						self.menu[1][6].text = L["Show"]
 					else
 						self.frame:Show()
-						self.menu[1][6].text = "Hide"
+						self.menu[1][6].text = L["Hide"]
 					end
 				end,
 			}
@@ -543,21 +547,21 @@ function Display:ToolTip()
 		count = count + 1
 
 		self.menu[1][5].menuList[6].menuList[count] = {
-			text = i or "All",
+			text = i or L["All"],
 			value = count,
 			func = function()
 				self.printNum = i
-				print("Set the output limit to " .. i)
+				print(string.format(L["Set the output limit to %d"], i))
 			end,
 		}
 	end
 
 	self.menu[1][5].menuList[6].menuList[count + 1] = {
-		text = "All",
+		text = L["All"],
 		value = count + 1,
 		func = function()
 			self.printNum = nil
-			print("Set the output limit to All")
+			print(L["Set the output limit to All"])
 		end,
 	}
 

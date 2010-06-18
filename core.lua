@@ -1,3 +1,7 @@
+local ADDON_NAME, Fiend = ...
+Fiend.L = Fiend.L or { }
+local L = setmetatable(Fiend.L, { __index = function(t, s) t[s] = s return s end })
+
 local addon = CreateFrame("Frame")
 addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
 addon:RegisterEvent("ADDON_LOADED")
@@ -72,16 +76,16 @@ function addon:ADDON_LOADED(name)
 	-- Display:NewView(String name, String[] events, int barSize, int[]
 	-- headerColor, int[] barColor)
 	-- Only name, events and size are required.
-	local damage = win:NewView("Damage", {
+	local damage = win:NewView(L["Damage"], {
 		"SWING_DAMAGE",
 		"RANGE_DAMAGE",
 		"SPELL_DAMAGE",
 		"SPELL_PERIODIC_DAMAGE",
 	}, 16, { 0.6, 0.2, 0.2 })
 
-	local heal = win:NewView("Healing", { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.2 })
+	local heal = win:NewView(L["Healing"], { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.2 })
 
-	local overHeal = win:NewView("OverHealing", { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.5 })
+	local overHeal = win:NewView(L["OverHealing"], { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.5 })
 	overHeal.overHeal = true
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
