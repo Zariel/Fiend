@@ -62,19 +62,18 @@ function View:UpdateDPS(time)
 	local t
 	for unit, guid in fiend:IterateUnitRoster() do
 		t = self.dps[guid]
-		if fiend:InCombat(guid) then
-			if t.timer < 5 then
-				t.timer = t.timer + time
-			else
-				t.time = t.time + 1
-				t.damage = t.damage + (t.segment / t.timer)
-
-				t.timer = 0
-				t.segment = 0
+		if(fiend:InCombat(guid)) then
+			if(t.reset) then
+				t.damage = 0
+				t.time = 0
+				t.reset = false
 			end
+
+			t.damage = t.damage + t.segment
+
+			t.time = t.time + time
 		else
-			--t.damage = 0
-			t.timer = 0
+			t.reset = true
 		end
 	end
 end
@@ -87,16 +86,19 @@ function View:Update(guid, ammount, name)
 	local bar = self.guids[guid]
 	bar.name = string.match(name, "(.*)\-?")
 
-	if not self.showDPS then
+	self.dps[guid].damage = self.dps[guid].damage + ammount
+
+	if(not self.showDPS) then
 		bar.total = bar.total + ammount
-		self.total = self.total + ammount
+	else
+		bar.total = self:GetDPS(bar.guid)
 	end
 
-	self.dps[guid].segment = self.dps[guid].segment + ammount
+	self.total = self.total + ammount
 
 	-- bar.per = math.floor(bar.total / self.total * 100)
 
-	if bar.total > 1e3 then
+	if(bar.total > 1e3) then
 		bar.right:SetText(math.floor((bar.total * 10) / 100) / 100 .. "k")
 	else
 		bar.right:SetText(bar.total)
@@ -106,11 +108,13 @@ function View:Update(guid, ammount, name)
 end
 
 function View:UpdateDisplay()
-	if not self.isActive or #self.bars == 0 or not self.display.frame:IsShown() then return end
+	if not self.isActive or #self.bars == 0 or not self.display.frame:IsShown() or self.updating then return end
+	self.updating = true
 
 	if self.showDPS then
 		for guid, bar in pairs(self.bars) do
-			bar.total = self:GetDPS(bar.guid)
+			--bar.total = self:GetDPS(bar.guid)
+			self:Update(bar.guid, 0, bar.name)
 		end
 	end
 
@@ -126,6 +130,7 @@ function View:UpdateDisplay()
 	local bar
 	for i = 1, #self.bars do
 		bar = self.bars[i]
+
 		if i > total then
 			bar.pos = 0
 			bar:Hide()
@@ -145,6 +150,7 @@ function View:UpdateDisplay()
 	end
 
 	self.dirty = false
+	self.updating = false
 end
 
 function View:RemoveAllBars()
@@ -238,17 +244,23 @@ function View:Output(count, where, player)
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
 		bar = self.bars[i]
-		output(string.format("%d. %s - %d %d%%", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100)))
+		local dps = self:GetDPS(bar.guid)
+
+		if(dps > 0) then
+			output(string.format("%d. %s - %d %d%% - %d dps", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100), dps))
+		else
+			output(string.format("%d. %s - %d %d%%", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100)))
+		end
 	end
 end
 
 function Display:OnUpdate(elapsed)
-	if self.currentView and self.currentView.dirty then
-		self.currentView:UpdateDisplay()
-	end
-
 	for i, view in pairs(self.views) do
 		view:UpdateDPS(elapsed)
+	end
+
+	if((self.currentView and self.currentView.dirty) or self.currentView.showDPS) then
+		self.currentView:UpdateDisplay()
 	end
 end
 

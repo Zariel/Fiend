@@ -130,8 +130,8 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	over = over or 0
 
 	-- Track over kill ?
-	-- local damage = ammount - (over + resist)
-	local damage = ammount
+	local damage = ammount - (over + resist)
+	--local damage = ammount
 
 	local overHeal
 	if (event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 then
