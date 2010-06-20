@@ -21,7 +21,13 @@ local tip = GameTooltip
 function Display.OnEnter(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
-		tip:AddDoubleLine(self.pos .. ". " .. self.name, self.parent:GetDPS(self.guid), self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
+
+		if(fiend.trackDPS) then
+			tip:AddDoubleLine(self.pos .. ". " .. self.name, self.parent:GetDPS(self.guid), self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
+		else
+			tip:AddLine(self.pos .. ". " .. self.name, self.col.r, self.col.g, self.col.b)
+		end
+
 		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
 
 		tip:Show()
@@ -43,55 +49,60 @@ local pool = setmetatable({}, {
 	end
 })
 
---This is bad because we can have duplicate data!
-local dpsMeta = {
-	__index = function(self, key)
-		local t = {
-			time = 0,
-			timer = 0,
-			damage = 0,
-			segment = 0,
-		}
+local dpsMeta
+if(fiend.trackDPS) then
+	--This is bad because we can have duplicate data!
+	dpsMeta = {
+		__index = function(self, key)
+			local t = {
+				time = 0,
+				timer = 0,
+				damage = 0,
+				segment = 0,
+			}
 
-		rawset(self, key, t)
-		return self[key]
-	end
-}
+			rawset(self, key, t)
+			return self[key]
+		end
+	}
 
-function View:UpdateDPS(time)
-	local t
-	for unit, guid in fiend:IterateUnitRoster() do
-		t = self.dps[guid]
-		if(fiend:InCombat(guid)) then
-			if(t.reset) then
-				t.damage = 0
-				t.time = 0
-				t.reset = false
+	function View:UpdateDPS(time)
+		local t
+		for unit, guid in fiend:IterateUnitRoster() do
+			t = self.dps[guid]
+			if(fiend:InCombat(guid)) then
+				if(t.reset) then
+					t.damage = 0
+					t.time = 0
+					t.reset = false
+				end
+
+				t.damage = t.damage + t.segment
+
+				t.time = t.time + time
+			else
+				t.reset = true
 			end
-
-			t.damage = t.damage + t.segment
-
-			t.time = t.time + time
-		else
-			t.reset = true
 		end
 	end
-end
 
-function View:GetDPS(guid)
-	return math.floor(self.dps[guid].damage / (self.dps[guid].time or 1))
+	function View:GetDPS(guid)
+		return math.floor(self.dps[guid].damage / (self.dps[guid].time or 1))
+	end
 end
 
 function View:Update(guid, ammount, name)
 	local bar = self.guids[guid]
 	bar.name = string.match(name, "(.*)\-?")
 
-	self.dps[guid].damage = self.dps[guid].damage + ammount
+	if(fiend.trackDPS) then
+		self.dps[guid].damage = self.dps[guid].damage + ammount
+	end
 
-	if(not self.showDPS) then
-		bar.total = bar.total + ammount
-	else
+	if(fiend.trackDPS and self.showDPS) then
 		bar.total = self:GetDPS(bar.guid)
+	else
+		bar.total = bar.total + ammount
 	end
 
 	self.total = self.total + ammount
@@ -111,7 +122,7 @@ function View:UpdateDisplay()
 	if not self.isActive or #self.bars == 0 or not self.display.frame:IsShown() or self.updating then return end
 	self.updating = true
 
-	if self.showDPS then
+	if(fiend.trackDPS and self.showDPS) then
 		for guid, bar in pairs(self.bars) do
 			--bar.total = self:GetDPS(bar.guid)
 			self:Update(bar.guid, 0, bar.name)
@@ -244,9 +255,12 @@ function View:Output(count, where, player)
 	for i = 1, count or #self.bars do
 		if not self.bars[i] then break end
 		bar = self.bars[i]
-		local dps = self:GetDPS(bar.guid)
 
-		if(dps > 0) then
+		if(fiend.trackDPS) then
+			local dps = self:GetDPS(bar.guid)
+		end
+
+		if(fiend.trackDPS and dps > 0) then
 			output(string.format("%d. %s - %d %d%% - %d dps", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100), dps))
 		else
 			output(string.format("%d. %s - %d %d%%", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100)))
@@ -255,11 +269,13 @@ function View:Output(count, where, player)
 end
 
 function Display:OnUpdate(elapsed)
-	for i, view in pairs(self.views) do
-		view:UpdateDPS(elapsed)
+	if(fiend.trackDPS) then
+		for i, view in pairs(self.views) do
+			view:UpdateDPS(elapsed)
+		end
 	end
 
-	if((self.currentView and self.currentView.dirty) or self.currentView.showDPS) then
+	if((self.currentView and self.currentView.dirty) or (fiend.trackDPS and self.currentView.showDPS)) then
 		self.currentView:UpdateDisplay()
 	end
 end
@@ -390,11 +406,6 @@ function Display:NewView(title, events, size, bg, color, dps)
 
 	local t = setmetatable({}, { __index = View })
 
-	for i, event in pairs(events) do
-		self.events[event] = self.events[event] or {}
-		table.insert(self.events[event], t)
-	end
-
 	t.bars = {}
 	t.size = size
 	t.title = title
@@ -402,10 +413,21 @@ function Display:NewView(title, events, size, bg, color, dps)
 	t.color = color
 	t.display = self
 	t.total = 0
-	t.dps = setmetatable({}, dpsMeta)
 
-	if dps then
-		t.showDPS = true
+	if(fiend.trackDPS) then
+		t.dps = setmetatable({}, dpsMeta)
+
+		if dps then
+			t.showDPS = true
+		end
+	elseif(dps) then
+		print("DPS tracking disabled, bailing!")
+		return
+	end
+
+	for i, event in pairs(events) do
+		self.events[event] = self.events[event] or {}
+		table.insert(self.events[event], t)
 	end
 
 	t.guids = setmetatable({}, { __index = function(s, guid)

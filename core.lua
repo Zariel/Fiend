@@ -46,6 +46,9 @@ local events = {
 
 local lastAction = {}
 
+-- [[ DPS TRACKING ENABLE HERE ]]
+addon.trackDPS = true
+
 function addon:ADDON_LOADED(name)
 	if name ~= "Fiend" then return end
 
@@ -146,7 +149,9 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			sourceName = UnitName(self:GetUnit(pet))
 		end
 
-		lastAction[sourceGUID] = timeStamp
+		if(self.trackDPS) then
+			lastAction[sourceGUID] = timeStamp
+		end
 
 		for name, display in pairs(self.displays) do
 			display:CombatEvent(event, sourceGUID, damage, sourceName, overHeal)
@@ -154,8 +159,10 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	end
 end
 
-function addon:InCombat(guid)
-	return time() - (lastAction[guid] or 0) < 5
+if(addon.trackDPS) then
+	function addon:InCombat(guid)
+		return time() - (lastAction[guid] or 0) < 5
+	end
 end
 
 function addon:initDropDown()
