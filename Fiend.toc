@@ -4,7 +4,7 @@
 ## Notes: Tracks Damage, Healing, Overhealing.
 ## Notes-koKR: 데미지, 힐링, 오버힐링을 추적합니다.
 ## Author: Zariel
-## Version: 3.3.3-5
+## Version: 3.3.3-7
 ## OptionalDeps: LibDataBroker-1.1
 
 Locale-koKR.lua
