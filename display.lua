@@ -21,7 +21,7 @@ local tip = GameTooltip
 function Display.OnEnter(self)
 	if self:IsShown() and self.pos > 0 then
 		tip:SetOwner(self, "ANCHOR_LEFT")
-		tip:AddDoubleLine(self.pos .. ". " .. self.name, "lal", self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
+		tip:AddDoubleLine(self.pos .. ". " .. self.name, self.parent:GetDPS(self.guid), self.col.r, self.col.g, self.col.b, self.col.r, self.col.g, self.col.b)
 		tip:AddDoubleLine(self.total, "(" .. math.floor(self.total / self.parent.total * 100) .. "%)", 1, 1, 1, 1, 1, 1)
 
 		tip:Show()
@@ -43,12 +43,56 @@ local pool = setmetatable({}, {
 	end
 })
 
+--This is bad because we can have duplicate data!
+local dpsMeta = {
+	__index = function(self, key)
+		local t = {
+			time = 0,
+			timer = 0,
+			damage = 0,
+			segment = 0,
+		}
+
+		rawset(self, key, t)
+		return self[key]
+	end
+}
+
+function View:UpdateDPS(time)
+	local t
+	for unit, guid in fiend:IterateUnitRoster() do
+		t = self.dps[guid]
+		if fiend:InCombat(guid) then
+			if t.timer < 5 then
+				t.timer = t.timer + time
+			else
+				t.time = t.time + 1
+				t.damage = t.damage + (t.segment / t.timer)
+
+				t.timer = 0
+				t.segment = 0
+			end
+		else
+			--t.damage = 0
+			t.timer = 0
+		end
+	end
+end
+
+function View:GetDPS(guid)
+	return math.floor(self.dps[guid].damage / (self.dps[guid].time or 1))
+end
+
 function View:Update(guid, ammount, name)
 	local bar = self.guids[guid]
 	bar.name = string.match(name, "(.*)\-?")
 
-	bar.total = bar.total + ammount
-	self.total = self.total + ammount
+	if not self.showDPS then
+		bar.total = bar.total + ammount
+		self.total = self.total + ammount
+	end
+
+	self.dps[guid].segment = self.dps[guid].segment + ammount
 
 	-- bar.per = math.floor(bar.total / self.total * 100)
 
@@ -63,6 +107,12 @@ end
 
 function View:UpdateDisplay()
 	if not self.isActive or #self.bars == 0 or not self.display.frame:IsShown() then return end
+
+	if self.showDPS then
+		for guid, bar in pairs(self.bars) do
+			bar.total = self:GetDPS(bar.guid)
+		end
+	end
 
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
 
@@ -196,6 +246,10 @@ function Display:OnUpdate(elapsed)
 	if self.currentView and self.currentView.dirty then
 		self.currentView:UpdateDisplay()
 	end
+
+	for i, view in pairs(self.views) do
+		view:UpdateDPS(elapsed)
+	end
 end
 
 function Display:CreateFrame(title)
@@ -319,7 +373,7 @@ function Display:CombatEvent(event, guid, ammount, name, overHeal)
 	end
 end
 
-function Display:NewView(title, events, size, bg, color)
+function Display:NewView(title, events, size, bg, color, dps)
 	if self.views[title] then return self.views[title] end
 
 	local t = setmetatable({}, { __index = View })
@@ -336,6 +390,11 @@ function Display:NewView(title, events, size, bg, color)
 	t.color = color
 	t.display = self
 	t.total = 0
+	t.dps = setmetatable({}, dpsMeta)
+
+	if dps then
+		t.showDPS = true
+	end
 
 	t.guids = setmetatable({}, { __index = function(s, guid)
 		local bar

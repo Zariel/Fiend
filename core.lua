@@ -12,6 +12,7 @@ local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local UnitName = UnitName
 local pairs = pairs
+local time = time
 
 local timer = 0
 local OnUpdate = function(self, elapsed)
@@ -43,6 +44,8 @@ local events = {
 	["SPELL_SUMMON"] = true,
 }
 
+local lastAction = {}
+
 function addon:ADDON_LOADED(name)
 	if name ~= "Fiend" then return end
 
@@ -72,9 +75,9 @@ function addon:ADDON_LOADED(name)
 
 	-- Displays are the windows
 	local win = self:NewDisplay("main")
-	-- Viewsyntax:
+	-- View syntax:
 	-- Display:NewView(String name, String[] events, int barSize, int[]
-	-- headerColor, int[] barColor)
+	-- headerColor, int[] barColor, bool dps)
 	-- Only name, events and size are required.
 	local damage = win:NewView(L["Damage"], {
 		"SWING_DAMAGE",
@@ -87,6 +90,13 @@ function addon:ADDON_LOADED(name)
 
 	local overHeal = win:NewView(L["OverHealing"], { "SPELL_HEAL", "SPELL_PERIDOIC_HEAL" }, 16, { 0.2, 0.6, 0.5 })
 	overHeal.overHeal = true
+
+	local dps = win:NewView(L["DPS"], {
+		"SWING_DAMAGE",
+		"RANGE_DAMAGE",
+		"SPELL_DAMAGE",
+		"SPELL_PERIODIC_DAMAGE",
+	}, 16, { 0.2, 0.6, 0.5 }, nil, true)
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
@@ -112,18 +122,20 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 
 	-- Bail, ususaly because the unit is in a vehicle and we dont have its
 	-- GUID mapping
-	if not self:GetUnit(sourceGUID) then return end
+	local unit = self:GetUnit(sourceGUID)
+	if not unit then return end
 
 	ammount = ammount or 0
 	resist = resist or 0
 	over = over or 0
 
 	-- Track over kill ?
-	local damage = ammount - (over + resist)
+	-- local damage = ammount - (over + resist)
+	local damage = ammount
 
-        local overHeal
+	local overHeal
 	if (event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 then
-                overHeal = over
+		overHeal = over
 	end
 
 	if damage > 0 or overHeal then
@@ -134,10 +146,16 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 			sourceName = UnitName(self:GetUnit(pet))
 		end
 
-                for name, display in pairs(self.displays) do
+		lastAction[sourceGUID] = timeStamp
+
+		for name, display in pairs(self.displays) do
 			display:CombatEvent(event, sourceGUID, damage, sourceName, overHeal)
 		end
 	end
+end
+
+function addon:InCombat(guid)
+	return time() - (lastAction[guid] or 0) < 5
 end
 
 function addon:initDropDown()
