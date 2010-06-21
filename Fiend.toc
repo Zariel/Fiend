@@ -3,11 +3,13 @@
 ## Title: Fiend
 ## Notes: Tracks Damage, Healing, Overhealing.
 ## Notes-koKR: 데미지, 힐링, 오버힐링을 추적합니다.
+## Notes-ruRU: Отслеживает урон, эффективное и избыточное исцеление.
 ## Author: Zariel
 ## Version: 3.3.3-5
 ## OptionalDeps: LibDataBroker-1.1
 
 Locale-koKR.lua
+locale-ruRU.lua
 
 core.lua
 roster.lua
