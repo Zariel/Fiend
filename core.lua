@@ -2,6 +2,8 @@ local ADDON_NAME, Fiend = ...
 Fiend.L = Fiend.L or { }
 local L = setmetatable(Fiend.L, { __index = function(t, s) t[s] = s return s end })
 
+local R = LibStub("ZeeRoster-1.0", 1)
+
 local addon = CreateFrame("Frame")
 addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
 addon:RegisterEvent("ADDON_LOADED")
@@ -118,14 +120,14 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 		ammount, over, school, resist = ...
 	elseif event == "SPELL_SUMMON" then
 		-- This is to get summoned pets like totems etc
-		return self:AddPet(destGUID, sourceGUID)
+		return R:AddPet(destGUID, sourceGUID)
 	else
 		spellId, spellName, spellSchool, ammount, over, school, resist = ...
 	end
 
 	-- Bail, ususaly because the unit is in a vehicle and we dont have its
 	-- GUID mapping
-	local unit = self:GetUnit(sourceGUID)
+	local unit = R:GetUnit(sourceGUID)
 	if not unit then return end
 
 	ammount = ammount or 0
@@ -142,7 +144,7 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	end
 
 	if damage > 0 or overHeal then
-		local pet = self:IsPet(sourceGUID)
+		local pet = R:IsPet(sourceGUID)
 
 		if pet then
 			sourceGUID = pet

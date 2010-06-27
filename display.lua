@@ -4,6 +4,8 @@ local ADDON_NAME, Fiend = ...
 Fiend.L = Fiend.L or { }
 local L = setmetatable(Fiend.L, { __index = function(t, s) t[s] = s return s end })
 
+local R = LibStub("ZeeRoster-1.0", 1)
+
 local Display = {
 }
 
@@ -68,7 +70,7 @@ if(fiend.trackDPS) then
 
 	function View:UpdateDPS(time)
 		local t
-		for unit, guid in fiend:IterateUnitRoster() do
+		for unit, guid in R:IterateUnitRoster() do
 			t = self.dps[guid]
 			if(fiend:InCombat(guid)) then
 				if(t.reset) then
@@ -89,6 +91,16 @@ if(fiend.trackDPS) then
 	function View:GetDPS(guid)
 		return math.floor(self.dps[guid].damage / (self.dps[guid].time or 1))
 	end
+
+	function View:GetTotalDPS()
+		local total = 0
+
+		for i = 1, #self.bars do
+			total = total + self.bars[i].total
+		end
+
+		return total
+	end
 end
 
 function View:Update(guid, ammount, name)
@@ -103,9 +115,8 @@ function View:Update(guid, ammount, name)
 		bar.total = self:GetDPS(bar.guid)
 	else
 		bar.total = bar.total + ammount
+		self.total = self.total + ammount
 	end
-
-	self.total = self.total + ammount
 
 	-- bar.per = math.floor(bar.total / self.total * 100)
 
@@ -127,9 +138,13 @@ function View:UpdateDisplay()
 			--bar.total = self:GetDPS(bar.guid)
 			self:Update(bar.guid, 0, bar.name)
 		end
+
+		self.total = self:GetTotalDPS()
 	end
 
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
+
+	self.display.frame.title:SetText(self.title .. " - " .. self.total)
 
 	local total = math.floor((self.display.frame:GetHeight() - 32) / self.size)
 	local width = self.display.frame:GetWidth()
@@ -256,11 +271,12 @@ function View:Output(count, where, player)
 		if not self.bars[i] then break end
 		bar = self.bars[i]
 
+		local dps
 		if(fiend.trackDPS) then
-			local dps = self:GetDPS(bar.guid)
+			dps = self:GetDPS(bar.guid)
 		end
 
-		if(fiend.trackDPS and dps > 0) then
+		if(fiend.trackDPS and dps > 0 and not self.showDPS) then
 			output(string.format("%d. %s - %d %d%% - %d dps", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100), dps))
 		else
 			output(string.format("%d. %s - %d %d%%", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100)))
@@ -477,7 +493,7 @@ function Display:NewView(title, events, size, bg, color, dps)
 		local col = t.color
 
 		if not col then
-			local unit = fiend:GetUnit(guid)
+			local unit = R:GetUnit(guid)
 			local class = select(2, GetPlayerInfoByGUID(guid)) or "WARRIOR"
 			col = RAID_CLASS_COLORS[class]
 		end
