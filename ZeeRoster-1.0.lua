@@ -2,7 +2,7 @@
 
 local lib = LibStub and LibStub:NewLibrary("ZeeRoster-1.0", 1)
 
-if(!lib) then
+if(not lib) then
 	return
 end
 
