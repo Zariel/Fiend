@@ -1,5 +1,10 @@
 -- Rosters ;<
-local fiend = _G.Fiend
+
+local lib = LibStub and LibStub:NewLibrary("ZeeRoster-1.0", 1)
+
+if(!lib) then
+	return
+end
 
 local UnitExists = UnitExists
 local UnitInRaid = UnitInRaid
@@ -16,14 +21,19 @@ local units = {}
 -- guid -> unit
 local guids = {}
 
+local f = CreateFrame("Frame")
+f:SetScript("OnEvent", function(self, event, ...)
+	return self[event](self, ...)
+end)
+
 local Clean = function(base, num)
 	local unit, guid
 	for i = 1, num do
 		unit = base .. i
 		guid = guids[unit]
 
-		if guid then
-			if revPets[guid] then
+		if(guid) then
+			if(revPets[guid]) then
 				pets[revPets[guid]] = nil
 				revPets[guid] = nil
 			end
@@ -40,7 +50,7 @@ local UpdateRoster = function(base, num)
 	for i = 1, num do
 		unit = base .. i
 
-		if UnitExists(unit) then
+		if(UnitExists(unit)) then
 			guid = UnitGUID(unit)
 
 			if guid == playerGUID then
@@ -50,32 +60,33 @@ local UpdateRoster = function(base, num)
 			units[unit] = guid
 			guids[guid] = unit
 
-			fiend:UNIT_PET(unit)
-		elseif units[unit] then
+			f:UNIT_PET(unit)
+		elseif(units[unit]) then
 			guids[units[unit]] = nil
 			units[unit] = nil
-			fiend:UNIT_PET(unit)
+
+			f:UNIT_PET(unit)
 		end
 	end
 end
 
-function fiend:RAID_ROSTER_UPDATE()
-	if not UnitInRaid("player") then
+function f:RAID_ROSTER_UPDATE()
+	if(not UnitInRaid("player")) then
 		return Clean("raid", 40)
 	end
 
 	UpdateRoster("raid", 40)
 end
 
-function fiend:PARTY_MEMBERS_CHANGED(...)
-	if not UnitExists("party1") then
+function f:PARTY_MEMBERS_CHANGED(...)
+	if(not UnitExists("party1")) then
 		return Clean("party", 4)
 	end
 
 	UpdateRoster("party", 4)
 end
 
-function fiend:PLAYER_ENTERING_WORLD()
+function f:PLAYER_ENTERING_WORLD()
 	playerGUID = playerGUID or UnitGUID("player")
 
 	units.player = playerGUID
@@ -86,50 +97,45 @@ function fiend:PLAYER_ENTERING_WORLD()
 	self:PARTY_MEMBERS_CHANGED()
 end
 
-function fiend:UNIT_PET(unit)
+function f:UNIT_PET(unit)
 	local guid = UnitGUID(unit)
 	local pet = unit .. "pet"
-	if UnitExists(pet) then
+
+	if(UnitExists(pet)) then
 		local pguid = UnitGUID(pet)
 		pets[pguid] = guid
 		revPets[guid] = pguid
 
 		units[pet] = pguid
 		guids[pguid] = pet
-	elseif revPets[guid] then
+	elseif(revPets[guid]) then
 		pets[revPets[guid]] = nil
 		revPets[guid] = nil
 
 		-- Does this still exist here?
-		if units[pet] then
+		if(units[pet]) then
 			guids[units[pet]] = nil
 			units[pet] = nil
 		end
 	end
 end
 
-fiend:RegisterEvent("RAID_ROSTER_UPDATE")
-fiend:RegisterEvent("PARTY_MEMBERS_CHANGED")
-fiend:RegisterEvent("PLAYER_ENTERING_WORLD")
-fiend:RegisterEvent("UNIT_PET")
-fiend:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+f:RegisterEvent("RAID_ROSTER_UPDATE")
+f:RegisterEvent("PARTY_MEMBERS_CHANGED")
+f:RegisterEvent("PLAYER_ENTERING_WORLD")
+f:RegisterEvent("UNIT_PET")
+f:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+f.ZONE_CHANGED_NEW_AREA = f.PARTY_MEMBERS_CHANGED
 
-fiend.ZONE_CHANGED_NEW_AREA = fiend.PARTY_MEMBERS_CHANGED
 
-function fiend:IsPet(guid)
+function lib:IsPet(guid)
 	return pets[guid]
 end
 
-function fiend:GetUnit(guid)
+function lib:GetUnit(guid)
 	return pets[guid] and guids[pets[guid]] or guids[guid]
 end
 
-function fiend:AddPet(guid, parent)
-	pets[guid] = parent
-	revPets[parent] = guid
-end
-
-function fiend:IterateUnitRoster()
+function lib:IterateUnitRoster()
 	return next, units, nil
 end
-
