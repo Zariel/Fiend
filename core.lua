@@ -1,8 +1,8 @@
 local ADDON_NAME, Fiend = ...
-Fiend.L = Fiend.L or { }
-local L = setmetatable(Fiend.L, { __index = function(t, s) t[s] = s return s end })
+local L = setmetatable(Fiend.L or {}, { __index = function(t, s) t[s] = s return s end })
 
-local R = LibStub("ZeeRoster-1.0", 1)
+local R = LibStub("ZeeRoster-1.0")
+local ID = LibStub("IdHitThat-1.0", true)
 
 local addon = CreateFrame("Frame")
 addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
@@ -31,8 +31,7 @@ end
 
 local ldb
 local band = bit.band
-local filter = bit.bor(COMBATLOG_OBJECT_AFFILIATION_RAID, COMBATLOG_OBJECT_AFFILIATION_PARTY)
-filter = bit.bor(filter, COMBATLOG_OBJECT_AFFILIATION_MINE)
+local filter = bit.bor(COMBATLOG_OBJECT_AFFILIATION_RAID, COMBATLOG_OBJECT_AFFILIATION_PARTY, COMBATLOG_OBJECT_AFFILIATION_MINE)
 
 local events = {
 	["SWING_DAMAGE"] = "Damage",
@@ -114,7 +113,7 @@ end
 
 local spellId, spellName, spellSchool, ammount, over, school, resist
 function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
-	if not events[event] or not band(sourceFlags, filter) then return end
+	if not(events[event] and band(sourceFlags, filter) > 0) then return end
 
 	if event == "SWING_DAMAGE" then
 		ammount, over, school, resist = ...
@@ -148,7 +147,7 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 
 		if pet then
 			sourceGUID = pet
-			sourceName = UnitName(self:GetUnit(pet))
+			sourceName = UnitName(R:GetUnit(pet))
 		end
 
 		if(self.trackDPS) then
