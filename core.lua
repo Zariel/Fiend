@@ -2,7 +2,6 @@ local ADDON_NAME, Fiend = ...
 local L = setmetatable(Fiend.L or {}, { __index = function(t, s) t[s] = s return s end })
 
 local R = LibStub("ZeeRoster-1.0")
-local ID = LibStub("IdHitThat-1.0", true)
 
 local addon = CreateFrame("Frame")
 addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
@@ -139,10 +138,6 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	local overHeal
 	if(event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 then
 		overHeal = over
-	end
-
-	if(ID) then
-		--print(sourceName, ID:InCombat(sourceGUID))
 	end
 
 	if(damage > 0 or overHeal) then
