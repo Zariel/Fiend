@@ -20,7 +20,7 @@ local timer = 0
 local OnUpdate = function(self, elapsed)
 	timer = timer + elapsed
 
-	if timer > 0.5 then
+	if(timer > 0.5) then
 		for i, d in pairs(self.displays) do
 			d:OnUpdate(timer)
 		end
@@ -51,11 +51,11 @@ local lastAction = {}
 addon.trackDPS = true
 
 function addon:ADDON_LOADED(name)
-	if name ~= "Fiend" then return end
+	if(name ~= "Fiend") then return end
 
 	ldb = LibStub and LibStub("LibDataBroker-1.1", true)
 
-	if ldb then
+	if(ldb) then
 		self:initDropDown()
 
 		local obj = ldb:NewDataObject("Fiend", {
@@ -70,8 +70,6 @@ function addon:ADDON_LOADED(name)
 
 		self.dataObj = obj
 	end
-
-	self:UnregisterEvent("ADDON_LOADED")
 
 	self.displays = {}
 
@@ -108,6 +106,7 @@ function addon:ADDON_LOADED(name)
 
 	self:SetScript("OnUpdate", OnUpdate)
 
+	self:UnregisterEvent("ADDON_LOADED")
 	self.ADDON_LOADED = nil
 end
 
@@ -127,7 +126,7 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	-- Bail, ususaly because the unit is in a vehicle and we dont have its
 	-- GUID mapping
 	local unit = R:GetUnit(sourceGUID)
-	if not unit then return end
+	if(not unit) then return end
 
 	ammount = ammount or 0
 	resist = resist or 0
@@ -138,14 +137,18 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	--local damage = ammount
 
 	local overHeal
-	if (event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 then
+	if(event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 then
 		overHeal = over
 	end
 
-	if damage > 0 or overHeal then
+	if(ID) then
+		--print(sourceName, ID:InCombat(sourceGUID))
+	end
+
+	if(damage > 0 or overHeal) then
 		local pet = R:IsPet(sourceGUID)
 
-		if pet then
+		if(pet) then
 			sourceGUID = pet
 			sourceName = UnitName(R:GetUnit(pet))
 		end

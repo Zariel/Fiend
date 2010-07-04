@@ -6,7 +6,7 @@
 ## Notes-ruRU: Отслеживает урон, эффективное и избыточное исцеление.
 ## Author: Zariel
 ## Version: 3.3.3-5
-## OptionalDeps: LibDataBroker-1.1, LibStub, ZeeRoster-1.0
+## OptionalDeps: LibDataBroker-1.1, LibStub, ZeeRoster-1.0, IdHitThat
 
 Locale-koKR.lua
 locale-ruRU.lua

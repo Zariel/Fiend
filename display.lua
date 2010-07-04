@@ -1,10 +1,13 @@
 local fiend = _G.Fiend
 
-local ADDON_NAME, Fiend = ...
-Fiend.L = Fiend.L or { }
-local L = setmetatable(Fiend.L, { __index = function(t, s) t[s] = s return s end })
+if(not fiend) then
+	return
+end
 
-local R = LibStub("ZeeRoster-1.0", 1)
+local ADDON_NAME, Fiend = ...
+local L = setmetatable(Fiend.L or {}, { __index = function(t, s) t[s] = s return s end })
+
+local R = LibStub("ZeeRoster-1.0")
 
 local Display = {
 }
