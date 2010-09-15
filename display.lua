@@ -10,6 +10,11 @@ local L = setmetatable(Fiend.L or {}, { __index = function(t, s) t[s] = s return
 local R = LibStub("ZeeRoster-1.0")
 
 local Display = {
+	titleBgColor = { 0, 0, 0, 0.8 },
+	titleFont = STANDARD_TEXT_FONT,
+	titleFontSize = 14,
+	barFont = STANDARD_TEXT_FONT,
+	barFontSize = 12,
 }
 
 local View = {
@@ -147,7 +152,11 @@ function View:UpdateDisplay()
 
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
 
-	self.display.frame.title:SetText(self.title .. " - " .. self.total)
+	self.display.frame.title:SetText(self.title)
+
+	if self.total ~= 0 then
+		self.display.frame.total:SetText(self.total)
+	end
 
 	local total = math.floor((self.display.frame:GetHeight() - 32) / self.size)
 	local width = self.display.frame:GetWidth()
@@ -342,16 +351,28 @@ function Display:CreateFrame(title)
 		insets = {left = 0, right = 0, top = 20, bottom = 0},
 	})
 
-	frame:SetBackdropColor(0, 0, 0, 0.8)
+	frame:SetBackdropColor(self.titleBgColor)
 
 	local title = frame:CreateFontString(nil, "OVERLAY")
-	title:SetFont(STANDARD_TEXT_FONT, 16)
+	title:SetFont(self.titleFont, self.titleFontSize)
 	title:SetText("Fiend")
 	title:SetJustifyH("CENTER")
 	title:SetPoint("CENTER")
 	title:SetPoint("TOP", 0, - 12)
+	title:SetShadowColor(0, 0, 0, 0.8)
+	title:SetShadowOffset(0.8, - 0.8)
 
 	frame.title = title
+
+	local total = frame:CreateFontString(nil, "OVERLAY")
+	total:SetFont(self.titleFont, self.titleFontSize - 1)
+	total:SetJustifyH("RIGHT")
+	total:SetPoint("RIGHT")
+	total:SetPoint("TOPRIGHT", -5, - 12)
+	total:SetShadowColor(0, 0, 0, 0.8)
+	total:SetShadowOffset(0.8, - 0.8)
+
+	frame.total = total
 
 	local drag = CreateFrame("Frame", nil, frame)
 	drag:SetHeight(16)
@@ -472,7 +493,7 @@ function Display:NewView(title, events, size, bg, color, dps)
 			bar.bg = bg
 
 			local left = bar:CreateFontString(nil, "OVERLAY")
-			left:SetFont(STANDARD_TEXT_FONT, size - 2)
+			left:SetFont(self.barFont, self.barFontSize)
 			left:SetPoint("LEFT", bar, "LEFT", 5, 0)
 			left:SetPoint("BOTTOM")
 			left:SetPoint("TOP")
@@ -482,7 +503,7 @@ function Display:NewView(title, events, size, bg, color, dps)
 			bar.left = left
 
 			local right = bar:CreateFontString(nil, "OVERLAY")
-			right:SetFont(STANDARD_TEXT_FONT, size - 2)
+			right:SetFont(self.barFont, self.barFontSize)
 			right:SetPoint("RIGHT", self.frame, "RIGHT", - 5, 0)
 			right:SetPoint("TOP")
 			right:SetPoint("BOTTOM")
