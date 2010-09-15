@@ -173,7 +173,7 @@ function addon:initDropDown()
 				owner = drop,
 				isTitle = true,
 			}, {
-				text = "Windows",
+				text = L["Windows"],
 				owner = drop,
 				hasArrow = true,
 				menuList = {

@@ -684,7 +684,7 @@ function Display:ToolTip()
 			value = count,
 			func = function()
 				self.printNum = i
-				print(string.format(L["Set the output limit to %d"], i))
+				print(string.format("|cffff8020Fiend:|r " .. L["Set the output limit to %d"], i))
 			end,
 		}
 	end
@@ -694,7 +694,7 @@ function Display:ToolTip()
 		value = count + 1,
 		func = function()
 			self.printNum = nil
-			print(L["Set the output limit to All"])
+			print("|cffff8020Fiend:|r " .. L["Set the output limit to All"])
 		end,
 	}
 

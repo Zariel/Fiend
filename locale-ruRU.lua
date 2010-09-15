@@ -1,9 +1,11 @@
 if GetLocale() ~= "ruRU" then return end
 local L = {}
 
+-- L["Windows"] = ""
 L["Damage"] = "Урон"
 L["Healing"] = "Исцеление"
 L["OverHealing"] = "Избыточное исцеление"
+-- L["DPS"] = ""
 L["Reset"] = "Сброс"
 L["Reset All"] = "Сбросить все"
 L["Displays"] = "Отображения"

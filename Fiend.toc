@@ -2,7 +2,7 @@
 
 ## Title: Fiend
 ## Notes: Tracks Damage, Healing, Overhealing. And some DPS for fun.
-## Notes-koKR: 데미지, 힐링, 오버힐링을 추적합니다.
+## Notes-koKR: 피해와 치유, 과다 치유 그리고 재미를 위해서 DPS를 추적합니다.
 ## Notes-ruRU: Отслеживает урон, эффективное и избыточное исцеление.
 ## Author: Zariel
 ## Version: 3.3.5-6
