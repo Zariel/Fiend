@@ -152,11 +152,13 @@ function View:UpdateDisplay()
 
 	table.sort(self.bars, function(a, b) return b.total < a.total end)
 
-	self.display.frame.title:SetText(self.title)
+	--self.display.frame.title:SetText(self.title)
 
+	--[[
 	if self.total ~= 0 then
 		self.display.frame.total:SetText(self.total)
 	end
+	]]
 
 	local total = math.floor((self.display.frame:GetHeight() - 32) / self.size)
 	local width = self.display.frame:GetWidth()

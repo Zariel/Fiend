@@ -159,8 +159,9 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 end
 
 if(addon.trackDPS) then
+	local time = time
 	function addon:InCombat(guid)
-		return time() - (lastAction[guid] or 0) < 5
+		return time() - (lastAction[guid] or 0) < 3
 	end
 end
 
