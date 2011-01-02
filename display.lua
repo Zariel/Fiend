@@ -714,7 +714,5 @@ function Display:ToolTip()
 
 	self.dropDown = drop
 
-	ns.slasher:tooltip2slash(self.menu, text)
-
 	return drop
 end
