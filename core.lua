@@ -1,11 +1,13 @@
-local ADDON_NAME, Fiend = ...
-local L = setmetatable(Fiend.L or {}, { __index = function(t, s) t[s] = s return s end })
+local parent, ns = ...
+local fiend = CreateFrame("Frame")
+ns.fiend = fiend
+ns.L = setmetatable(fiend.L or {}, { __index = function(t, s) t[s] = s return s end })
 
+local L = ns.L
 local R = LibStub("ZeeRoster-1.0")
 
-local addon = CreateFrame("Frame")
-addon:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
-addon:RegisterEvent("ADDON_LOADED")
+fiend:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
+fiend:RegisterEvent("ADDON_LOADED")
 
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitInVehicle = UnitInVehicle
@@ -47,9 +49,9 @@ local events = {
 local lastAction = {}
 
 -- [[ DPS TRACKING ENABLE HERE ]]
-addon.trackDPS = true
+fiend.trackDPS = true
 
-function addon:ADDON_LOADED(name)
+function fiend:ADDON_LOADED(name)
 	if(name ~= "Fiend") then return end
 
 	ldb = LibStub and LibStub("LibDataBroker-1.1", true)
@@ -62,7 +64,7 @@ function addon:ADDON_LOADED(name)
 			icon = [[Interface\Icons\Ability_BullRush]],
 			OnClick = function(self, button)
 				if button == "RightButton" then
-					ToggleDropDownMenu(1, nil, addon.dropDown, "cursor")
+					ToggleDropDownMenu(1, nil, fiend.dropDown, "cursor")
 				end
 			end,
 		})
@@ -110,7 +112,7 @@ function addon:ADDON_LOADED(name)
 end
 
 local spellId, spellName, spellSchool, ammount, over, school, resist
-function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
+function fiend:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
 	if not(events[event] and band(sourceFlags, filter) > 0) then return end
 
 	if event == "SWING_DAMAGE" then
@@ -158,14 +160,14 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	end
 end
 
-if(addon.trackDPS) then
+if(fiend.trackDPS) then
 	local time = time
-	function addon:InCombat(guid)
+	function fiend:InCombat(guid)
 		return time() - (lastAction[guid] or 0) < 3
 	end
 end
 
-function addon:initDropDown()
+function fiend:initDropDown()
 	local drop = CreateFrame("Frame", "FiendDropDown", UIParent, "UIDropDownMenuTemplate")
 	self.menu = {
 		{
@@ -193,5 +195,3 @@ function addon:initDropDown()
 
 	self.dropDown = drop
 end
-
-_G.Fiend = addon

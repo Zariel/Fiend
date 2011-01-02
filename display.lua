@@ -1,11 +1,6 @@
-local fiend = _G.Fiend
-
-if(not fiend) then
-	return
-end
-
-local ADDON_NAME, Fiend = ...
-local L = setmetatable(Fiend.L or {}, { __index = function(t, s) t[s] = s return s end })
+local parent, ns = ...
+local fiend = ns.fiend
+local L = ns.L
 
 local R = LibStub("ZeeRoster-1.0")
 
@@ -718,6 +713,8 @@ function Display:ToolTip()
 	end
 
 	self.dropDown = drop
+
+	ns.slasher:tooltip2slash(self.menu, text)
 
 	return drop
 end
