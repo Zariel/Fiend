@@ -1,4 +1,4 @@
-## Interface: 305000
+## Interface: 400000
 
 ## Title: Fiend
 ## Notes: Tracks Damage, Healing, Overhealing. And some DPS for fun.

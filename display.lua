@@ -104,6 +104,12 @@ if(fiend.trackDPS) then
 
 		return total
 	end
+
+	function View:ResetDPS()
+		for k, v in pairs(self.dps) do
+			v.reset = true
+		end
+	end
 end
 
 function View:Update(guid, ammount, name)
@@ -189,6 +195,10 @@ function View:UpdateDisplay()
 end
 
 function View:RemoveAllBars()
+	if(self.dps) then
+		self:ResetDPS()
+	end
+
 	local bar
 	for i = 1, #self.bars do
 		bar = table.remove(self.bars, 1)
@@ -454,7 +464,7 @@ function Display:NewView(title, events, size, bg, color, dps)
 	if(fiend.trackDPS) then
 		t.dps = setmetatable({}, dpsMeta)
 
-		if dps then
+		if(dps) then
 			t.showDPS = true
 		end
 	elseif(dps) then
@@ -587,7 +597,7 @@ function Display:ToolTip()
 				text = L["Reset"],
 				owner = drop,
 				func = function()
-					if self.currentView then
+					if(self.currentView) then
 						self.currentView:RemoveAllBars()
 					end
 				end,
