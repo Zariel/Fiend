@@ -22,5 +22,5 @@ L["All"] = "모두"
 L["Set the output limit to %d"] = "출력 한계를 %d개로 설정합니다."
 L["Set the output limit to All"] = "출력 한계를 모두로 설정합니다."
 
-local _, Fiend = ...
-Fiend.L = L
+local parent, ns = ...
+ns.L = L

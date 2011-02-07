@@ -1,0 +1,3 @@
+local parent, ns = ...
+ns.fiend = CreateFrame("Frame")
+ns.L = setmetatable(ns.L or {}, { __index = function(t, s) t[s] = s return s end })

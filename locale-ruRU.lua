@@ -22,5 +22,5 @@ L["All"] = "Все"
 L["Set the output limit to %d"] = "Установить предел вывода на %d строк"
 L["Set the output limit to All"] = "Установить предел вывода на все строки"
 
-local _, Fiend = ...
-Fiend.L = L
+local _, ns = ...
+ns.L = L

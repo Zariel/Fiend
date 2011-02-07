@@ -10,6 +10,8 @@
 
 LibStub.lua
 
+init.lua
+
 Locale-koKR.lua
 locale-ruRU.lua
 

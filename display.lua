@@ -295,11 +295,7 @@ function View:Output(count, where, player)
 			dps = self:GetDPS(bar.guid)
 		end
 
-		if(fiend.trackDPS and dps > 0 and not self.showDPS) then
-			output(string.format("%d. %s - %d %d%% - %d dps", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100), dps))
-		else
-			output(string.format("%d. %s - %d %d%%", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100)))
-		end
+		output(string.format("%d. %s - %d %d%%", i, bar.name, bar.total, (math.floor(bar.total * 10000 / self.total) / 100)))
 	end
 end
 

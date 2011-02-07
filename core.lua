@@ -1,7 +1,4 @@
-local parent, ns = ...
-local fiend = CreateFrame("Frame")
-ns.fiend = fiend
-ns.L = setmetatable(fiend.L or {}, { __index = function(t, s) t[s] = s return s end })
+local fiend = ns.fiend
 
 local L = ns.L
 local R = LibStub("ZeeRoster-1.0")
