@@ -109,7 +109,7 @@ function fiend:ADDON_LOADED(name)
 end
 
 local spellId, spellName, spellSchool, ammount, over, school, resist
-function fiend:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
+function fiend:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
 	if not(events[event] and band(sourceFlags, filter) > 0) then return end
 
 	if event == "SWING_DAMAGE" then
