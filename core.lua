@@ -1,3 +1,5 @@
+local parent, ns = ...
+
 local fiend = ns.fiend
 
 local L = ns.L
@@ -108,17 +110,17 @@ function fiend:ADDON_LOADED(name)
 	self.ADDON_LOADED = nil
 end
 
-local spellId, spellName, spellSchool, ammount, over, school, resist
-function fiend:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, ...)
+local ammount, over
+function fiend:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, destRaidFlags, ...)
 	if not(events[event] and band(sourceFlags, filter) > 0) then return end
 
 	if event == "SWING_DAMAGE" then
-		ammount, over, school, resist = ...
+		ammount = ...
 	elseif event == "SPELL_SUMMON" then
 		-- This is to get summoned pets like totems etc
 		return R:AddPet(destGUID, sourceGUID)
 	else
-		spellId, spellName, spellSchool, ammount, over, school, resist = ...
+		ammount, over = select(4, ...)
 	end
 
 	-- Bail, ususaly because the unit is in a vehicle and we dont have its
@@ -126,17 +128,11 @@ function fiend:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, sourceGUID, sourceN
 	local unit = R:GetUnit(sourceGUID)
 	if(not unit) then return end
 
-	ammount = ammount or 0
-	resist = resist or 0
-	over = over or 0
-
-	-- Track over kill ?
-	local damage = ammount - (over + resist)
-	--local damage = ammount
+	local damage = ammount or 0
 
 	local overHeal
 	if(event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 then
-		overHeal = over
+		overHeal = over - ammount
 	end
 
 	if(damage > 0 or overHeal) then
