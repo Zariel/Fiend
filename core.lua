@@ -134,7 +134,7 @@ function fiend:COMBAT_LOG_EVENT_UNFILTERED(timeStamp, event, hideCaster, sourceG
 
 	local overHeal
 	if(event == "SPELL_HEAL" or event == "SPELL_PERIDOIC_HEAL") and over > 0 then
-		overHeal = over - ammount
+		overHeal = over
 	end
 
 	if(damage > 0 or overHeal) then
